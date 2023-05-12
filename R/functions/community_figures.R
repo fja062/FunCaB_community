@@ -34,29 +34,29 @@ make_sp_pca_figure <- function(community_pca){
           panel.grid.minor = element_blank())
 
 
-  p_all <- p1 +
-    labs(x = glue("PCA1 ({round(e_B[1] * 100, 1)}%)"),
-         y = glue("PCA2 ({round(e_B[2] * 100, 1)}%)"),
-         tag = "A") +
-    scale_color_manual(name = "Habitat type",
-                       values = c("blue", "forestgreen", "orange"),
-                       labels = expression(Snowbed, italic(Cassiope)~heath, italic(Dryas)~heath)) +
-    xlim(-3, 3.8) +
-    # species names
-    geom_text(data = pca_sp[[2]] |>
-                mutate(Label = capitalize(Label)) |>
-                inner_join(species, by = "Label") |>
-                mutate(Label = if_else(Label == "Unidentified liverwort sp", "Liverwort sp", Label)),
-              aes(x = PC1 + case_when(Label == "Festuca rubra" ~ -1,
-                                      Label == "Liverwort sp" ~ -1,
-                                      Label == "Peltigera sp" ~ 0.5,
-                                      Label == "Dicranum sp" ~ 1,
-                                      TRUE ~ 0),
-                  y = PC2 + case_when(PC2 > 0 ~ 0.3,
-                                      Label == "Dicranum sp" ~ 0.1,
-                                      TRUE ~ -0.3),
-                  label = Label), col = 'black') +
-    # stats
-    geom_text(aes(x = -2.5, y = 1, label = "T x H*** + H x Y***"), colour = "black") +
-    theme(legend.position = "top")
+  # p_all <- p1 +
+  #   labs(x = glue("PCA1 ({round(e_B[1] * 100, 1)}%)"),
+  #        y = glue("PCA2 ({round(e_B[2] * 100, 1)}%)"),
+  #        tag = "A") +
+  #   scale_color_manual(name = "Habitat type",
+  #                      values = c("blue", "forestgreen", "orange"),
+  #                      labels = expression(Snowbed, italic(Cassiope)~heath, italic(Dryas)~heath)) +
+  #   xlim(-3, 3.8) +
+  #   # species names
+  #   geom_text(data = pca_sp[[2]] |>
+  #               mutate(Label = capitalize(Label)) |>
+  #               inner_join(species, by = "Label") |>
+  #               mutate(Label = if_else(Label == "Unidentified liverwort sp", "Liverwort sp", Label)),
+  #             aes(x = PC1 + case_when(Label == "Festuca rubra" ~ -1,
+  #                                     Label == "Liverwort sp" ~ -1,
+  #                                     Label == "Peltigera sp" ~ 0.5,
+  #                                     Label == "Dicranum sp" ~ 1,
+  #                                     TRUE ~ 0),
+  #                 y = PC2 + case_when(PC2 > 0 ~ 0.3,
+  #                                     Label == "Dicranum sp" ~ 0.1,
+  #                                     TRUE ~ -0.3),
+  #                 label = Label), col = 'black') +
+  #   # stats
+  #   geom_text(aes(x = -2.5, y = 1, label = "T x H*** + H x Y***"), colour = "black") +
+  #   theme(legend.position = "top")
 }

@@ -1,33 +1,33 @@
 ### ordination
 
-calc_comm_metrics <- function(comm){
-
-  comm_resp <- comm %>%
-    group_by(Year, Site, Treatment, PlotID) %>%
-    summarise(Richness = n(),
-              Diversity = diversity(Abundance),
-              Evenness = Diversity/log(Richness),
-
-              # proportions
-              sumAbundance = sum(Abundance),
-              propGraminoid = sum(Abundance[FunctionalGroup %in% c("graminoid")])/sumAbundance,
-              propForb = sum(Abundance[FunctionalGroup %in% c("forb")])/sumAbundance,
-              propShrub = sum(Abundance[FunctionalGroup %in% c("eshrub", "dshrub")])/sumAbundance,
-              propEShrub = sum(Abundance[FunctionalGroup %in% c("eshrub")])/sumAbundance,
-              propDShrub = sum(Abundance[FunctionalGroup %in% c("dshrub")])/sumAbundance,
-              propLichen = sum(Abundance[FunctionalGroup %in% c("lichen")])/sumAbundance,
-              propBryo = sum(Abundance[FunctionalGroup %in% c("moss", "liverwort")])/sumAbundance,
-
-              # abundance
-              totalVascular = sum(Abundance[FunctionalGroup %in% c("graminoid", "forb", "eshrub", "dshrub")]),
-              totalGraminoid = sum(Abundance[FunctionalGroup %in% c("graminoid")]),
-              totalForb = sum(Abundance[FunctionalGroup %in% c("forb")]),
-              totalShrub = sum(Abundance[FunctionalGroup %in% c("eshrub", "dshrub")]),
-              totaleShrub = sum(Abundance[FunctionalGroup %in% c("eshrub")]),
-              totaldShrub = sum(Abundance[FunctionalGroup %in% c("dshrub")])
-    )
-  return(comm_resp)
-}
+# calc_comm_metrics <- function(comm){
+#
+#   comm_resp <- comm %>%
+#     group_by(Year, Site, Treatment, PlotID) %>%
+#     summarise(Richness = n(),
+#               Diversity = diversity(Abundance),
+#               Evenness = Diversity/log(Richness),
+#
+#               # proportions
+#               sumAbundance = sum(Abundance),
+#               propGraminoid = sum(Abundance[FunctionalGroup %in% c("graminoid")])/sumAbundance,
+#               propForb = sum(Abundance[FunctionalGroup %in% c("forb")])/sumAbundance,
+#               propShrub = sum(Abundance[FunctionalGroup %in% c("eshrub", "dshrub")])/sumAbundance,
+#               propEShrub = sum(Abundance[FunctionalGroup %in% c("eshrub")])/sumAbundance,
+#               propDShrub = sum(Abundance[FunctionalGroup %in% c("dshrub")])/sumAbundance,
+#               propLichen = sum(Abundance[FunctionalGroup %in% c("lichen")])/sumAbundance,
+#               propBryo = sum(Abundance[FunctionalGroup %in% c("moss", "liverwort")])/sumAbundance,
+#
+#               # abundance
+#               totalVascular = sum(Abundance[FunctionalGroup %in% c("graminoid", "forb", "eshrub", "dshrub")]),
+#               totalGraminoid = sum(Abundance[FunctionalGroup %in% c("graminoid")]),
+#               totalForb = sum(Abundance[FunctionalGroup %in% c("forb")]),
+#               totalShrub = sum(Abundance[FunctionalGroup %in% c("eshrub", "dshrub")]),
+#               totaleShrub = sum(Abundance[FunctionalGroup %in% c("eshrub")]),
+#               totaldShrub = sum(Abundance[FunctionalGroup %in% c("dshrub")])
+#     )
+#   return(comm_resp)
+# }
 
 
 
