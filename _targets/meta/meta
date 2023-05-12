@@ -1,0 +1,16 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+analysis_plan|object|88554b2aeb235573|||||||||||||||
+biomass|stem|21a1290c0e148864|46b7fb9dc6afa4fa|fbb7352077c6f74b|-966089773||t19489.3290746392s|0206938e6f1d9da4|32918|rds|local|vector|||0.114||
+biomass_download|stem|2fc8240187f7b456|3c7c716700673077|d84f79e1f6ae5e91|-1190630635|data/FunCaB_clean_biomass_2015-2021.csv|t19169.5029866839s|a4f433c2c370393a|391054|file|local|vector|||2.786||
+biomass_raw|stem|c41418ba6bf11be5|c4379353205d3630|601f1575ef7c38c9|1611033607||t19489.307854667s|54f44c18b524cb0b|28591|rds|local|vector|||0.35||
+calc_comm_metrics|function|a9ff8116ab382eae|||||||||||||||
+community_download|stem|e4066f9259835a44|526d7d79288c94c4|d84f79e1f6ae5e91|1180310886|data/FunCaB_clean_composition_2015-2019.csv|t19086.3480851625s|649d96e7a3ee1aa8|1397248|file|local|vector|||3.893||
+community_pca|stem|6830ca4ace75f8d3|1055c50dd61c4af4|5922127c2a1a11c0|788019400||t19489.3453939682s|d178a2afd211b935|2447656|rds|local|vector|||0.272||
+community_raw|stem|fa91c0a16000b392|7bbde6b7fc6aae16|e86a5b7cfc50a987|-1325354023||t19489.3078578033s|7de4c8de52b20deb|212707|rds|local|vector|||0.086||
+cover|stem|7c8b5f0bd7db5591|d59d509e24a0141e|24c481396d23394f|910882857||t19489.34538927s|c0151e2d33b3d133|81303|rds|local|vector|||0.071||
+download_plan|object|1064d70a46fa64df|||||||||||||||
+make_sp_pca|function|d9cf6e9073973c31|||||||||||||||
+make_sp_pca_figure|function|a9db9856aef64898|||||||||||||||
+manuscript_plan|object|d0c8c859b39c74bd|||||||||||||||
+tranformation_plan|object|d1d90a9973a42151|||||||||||||||
+transformation_plan|object|84fad45f9982a4f8|||||||||||||||
