@@ -1,33 +1,14 @@
-### ordination
+### community analysis functions
 
-# calc_comm_metrics <- function(comm){
-#
-#   comm_resp <- comm %>%
-#     group_by(Year, Site, Treatment, PlotID) %>%
-#     summarise(Richness = n(),
-#               Diversity = diversity(Abundance),
-#               Evenness = Diversity/log(Richness),
-#
-#               # proportions
-#               sumAbundance = sum(Abundance),
-#               propGraminoid = sum(Abundance[FunctionalGroup %in% c("graminoid")])/sumAbundance,
-#               propForb = sum(Abundance[FunctionalGroup %in% c("forb")])/sumAbundance,
-#               propShrub = sum(Abundance[FunctionalGroup %in% c("eshrub", "dshrub")])/sumAbundance,
-#               propEShrub = sum(Abundance[FunctionalGroup %in% c("eshrub")])/sumAbundance,
-#               propDShrub = sum(Abundance[FunctionalGroup %in% c("dshrub")])/sumAbundance,
-#               propLichen = sum(Abundance[FunctionalGroup %in% c("lichen")])/sumAbundance,
-#               propBryo = sum(Abundance[FunctionalGroup %in% c("moss", "liverwort")])/sumAbundance,
-#
-#               # abundance
-#               totalVascular = sum(Abundance[FunctionalGroup %in% c("graminoid", "forb", "eshrub", "dshrub")]),
-#               totalGraminoid = sum(Abundance[FunctionalGroup %in% c("graminoid")]),
-#               totalForb = sum(Abundance[FunctionalGroup %in% c("forb")]),
-#               totalShrub = sum(Abundance[FunctionalGroup %in% c("eshrub", "dshrub")]),
-#               totaleShrub = sum(Abundance[FunctionalGroup %in% c("eshrub")]),
-#               totaldShrub = sum(Abundance[FunctionalGroup %in% c("dshrub")])
-#     )
-#   return(comm_resp)
-# }
+calc_diversity <- function(cover){
+  
+  cover %>%
+     group_by(year, siteID, blockID, plotID, removal, treatment, 
+      functional_group, temperature_level, precipitation_level) %>%
+     summarise(richness = n(),
+               diversity = diversity(cover),
+               evenness = diversity/log(richness))
+}
 
 
 
@@ -51,11 +32,17 @@ make_sp_pca <- function(cover){
   res <- rda(comm_sp)
 
   out <- bind_cols(comm_info, fortify(res) |>
-                     filter(Score == "sites"))
+                     filter(score == "sites"))
 
   sp <- fortify(res) |>
-    filter(Score == "species")
+    filter(score == "species")
 
   return(list(out, sp, res))
 
 }
+  
+
+cover |> 
+  filter(treatment == "B")
+  distinct(functional_group)
+  pivot_wider(names_from = treatment, values_from = cover)

@@ -1,7 +1,7 @@
 # data analysis plan
 analysis_plan <- list(
 
-  # prep biomass
+  # make pca
   tar_target(
     name = community_pca,
     command = make_sp_pca(cover)
