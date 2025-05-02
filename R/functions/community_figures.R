@@ -6,9 +6,9 @@ make_sp_pca_figure <- function(community_pca){
 
   species <- community_pca[[2]] |>
     mutate(length = sqrt(PC1^2 + PC2^2),
-           Label = capitalize(Label)) |>
+           label = capitalize(label)) |>
     filter(length > 0.7) |>
-    select(Label, length)
+    select(label, length)
 
   community_pca[[1]] |>
     #mutate(Treatment = recode(Treatment, CTL = "Control", OTC = "Warming")) |>
@@ -21,9 +21,11 @@ make_sp_pca_figure <- function(community_pca){
     geom_point(aes(size = ifelse(year == min(as.numeric(year)), "First", "Other"))) +
     geom_path(aes(linetype = treatment, group = plotID)) +
     coord_equal() +
-    scale_size_discrete(name = "Year", range = c(1.5, 3), limits = c("Other", "First"), breaks = c("First", "Other")) +
+    scale_size_discrete(name = "Year", range = c(0.5, 2), limits = c("Other", "First"), breaks = c("First", "Other")) +
     # scale_linetype_manual(values = c("dashed", "solid")) +
     # scale_shape_manual(values = c(1, 17)) +
+    labs(x = glue("PCA1 ({round(e_B[1] * 100, 1)}%)"),
+    y = glue("PCA2 ({round(e_B[2] * 100, 1)}%)")) +
     facet_grid(temperature_level ~ precipitation_level) +
 
     theme_bw()
@@ -60,3 +62,14 @@ make_sp_pca_figure <- function(community_pca){
   #   geom_text(aes(x = -2.5, y = 1, label = "T x H*** + H x Y***"), colour = "black") +
   #   theme(legend.position = "top")
 }
+
+make_diversity_figure <- function(cover){
+
+  diversity |> 
+    ggplot(aes(x = treatment, y = richness, fill = treatment)) +
+    geom_boxplot() +
+    facet_grid(rows = vars(precipitation_level),
+                cols = vars(temperature_level))
+  
+}
+
