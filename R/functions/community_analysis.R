@@ -41,8 +41,14 @@ make_sp_pca <- function(cover){
 
 }
   
+get_fg_cover <- function(fg_cover){
 
-cover |> 
-  filter(treatment == "B")
-  distinct(functional_group)
-  pivot_wider(names_from = treatment, values_from = cover)
+  fg_cover |> 
+    select(year:treatment, graminoid = total_graminoids, forb = total_forbs, 
+      bryophyte = total_bryophytes) |> 
+    pivot_wider(names_from = treatment, 
+                values_from = c(graminoid, forb, bryophyte)) |> 
+    pivot_longer()
+  
+}
+
