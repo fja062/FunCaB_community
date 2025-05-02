@@ -22,6 +22,16 @@ download_plan <- list(
     format = "file"
   ),
 
+    # plant functional traits
+    tar_target(
+      name = traits_download,
+      command =  get_file(node = "npfa9",
+                          file = "VCG_clean_trait_data_2012-2016.csv",
+                          path = "data",
+                          remote_path = "5_Trait_data"),
+      format = "file"
+    ),
+
     # climate data
     tar_target(
       name = gridded_climate_download,
@@ -44,6 +54,12 @@ download_plan <- list(
     name = community_raw,
     command =  read_csv(community_download)
   ),
+
+    # plant functional traits
+    tar_target(
+      name = traits_raw,
+      command =  read_csv(traits_download)
+    ),
 
     # climate data
     tar_target(
