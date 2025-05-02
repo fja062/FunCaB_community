@@ -91,6 +91,20 @@ tar_target(
                                            siteID %in% c("Vikesland", "Hogsete", "Lavisdalen") ~ 2,
                                            siteID %in% c("Arhelleren", "Rambera", "Gudmedalen") ~ 3,
                                            TRUE ~ 4))
+),
+
+tar_target(
+  name = traits,
+  command = traits_raw |> 
+    select(-date, -flag) |> 
+      mutate(temperature_level = case_when(siteID %in% c("Ulvehaugen", "Skjelingahaugen", "Lavisdalen", "Gudmedalen") ~ "alpine",
+    siteID %in% c("Alrust", "Veskre", "Rambera", "Hogsete") ~ "sub-alpine",
+    TRUE ~ "boreal"),
+temperature_level = factor(temperature_level, levels = c("alpine", "sub-alpine", "boreal")),
+precipitation_level = case_when(siteID %in% c("Fauske", "Alrust", "Ulvehaugen") ~ 1,
+      siteID %in% c("Vikesland", "Hogsete", "Lavisdalen") ~ 2,
+      siteID %in% c("Arhelleren", "Rambera", "Gudmedalen") ~ 3,
+      TRUE ~ 4))
 )
 
 )
