@@ -5,37 +5,37 @@ transformation_plan <- list(
   tar_target(
     name = gridded_climate,
     command = {
-      dat <- gridded_climate_raw |> 
+      dat <- gridded_climate_raw |>
       filter(variable %in% c("temperature", "precipitation"),
-              year(date) %in% c(2008:2019)) |> 
-      pivot_wider(names_from = variable, values_from = value) |> 
+              year(date) %in% c(2008:2019)) |>
+      pivot_wider(names_from = variable, values_from = value) |>
       mutate(year = year(date))
-      
-      left_join(dat |> 
-        group_by(year, siteID) |> 
-        summarise(precipitation = sum(precipitation, na.rm = TRUE)) |> 
-        ungroup() |> 
-        group_by(siteID) |> 
-        summarise(precipitation = mean(precipitation, na.rm = TRUE)),
-      dat |> 
-        mutate(month = month(date)) |> 
-        filter(month %in% c(6, 7, 8)) |> 
-        group_by(year, month, siteID) |> 
-        summarise(temperature = mean(temperature)) |> 
+
+      left_join(dat |>
+        group_by(year, siteID) |>
+        summarise(precipitation = sum(precipitation, na.rm = TRUE)) |>
         ungroup() |>
-        group_by(siteID) |> 
+        group_by(siteID) |>
+        summarise(precipitation = mean(precipitation, na.rm = TRUE)),
+      dat |>
+        mutate(month = month(date)) |>
+        filter(month %in% c(6, 7, 8)) |>
+        group_by(year, month, siteID) |>
+        summarise(temperature = mean(temperature)) |>
+        ungroup() |>
+        group_by(siteID) |>
         summarise(temperature = mean(temperature)),
     by = "siteID")
-      
+
     }
-  
+
       ),
 
 
   # prep biomass
   tar_target(
     name = removed_biomass,
-    command = removed_biomass_raw |> 
+    command = removed_biomass_raw |>
       # remove extra plots in 2016
       filter(treatment != "XC") |>
       # sum biomass from different rounds
@@ -48,9 +48,9 @@ transformation_plan <- list(
   ### PROBLEM WITH THIS DATA, ONE DUPLICATE???
   tar_target(
     name = standing_biomass,
-    command = removed_biomass_raw |> 
+    command = removed_biomass_raw |>
       # control plots in 2016
-      filter(treatment == "XC") |> 
+      filter(treatment == "XC") |>
       rename(standing_biomass = biomass)
   ),
 
@@ -76,13 +76,13 @@ tar_target(
   command = community_raw |>
     # remove extra plots in 2016
     filter(treatment != "XC") |>
-    select(year:treatment, total_graminoids, total_forbs, total_bryophytes) |>
-    tidylog::distinct() |> 
+    select(year:treatment, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
+    tidylog::distinct() |>
     #remove duplicates
     dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, treatment)) |>
-    tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |> 
+    tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
     # remove last duplicate
-    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2)) |> 
+    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2)) |>
     mutate(temperature_level = case_when(siteID %in% c("Ulvehaugen", "Skjelingahaugen", "Lavisdalen", "Gudmedalen") ~ "alpine",
                                          siteID %in% c("Alrust", "Veskre", "Rambera", "Hogsete") ~ "sub-alpine",
                                          TRUE ~ "boreal"),
