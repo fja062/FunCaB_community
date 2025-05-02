@@ -4,7 +4,7 @@ download_plan <- list(
   # download data
   # biomass
   tar_target(
-    name = biomass_download,
+    name = removed_biomass_download,
     command =  get_file(node = "4c5v2",
                         file = "FunCaB_clean_biomass_2015-2021.csv",
                         path = "data",
@@ -35,8 +35,8 @@ download_plan <- list(
   # import data
   # biomass
   tar_target(
-    name = biomass_raw,
-    command =  read_csv(biomass_download)
+    name = removed_biomass_raw,
+    command =  read_csv(removed_biomass_download)
   ),
 
   # community composition
