@@ -1,8 +1,8 @@
 # make fancy data
 
-make_fancy_data <- function(data, gridded_climate){
+make_fancy_data <- function(data, gridded_climate, fix_treatment = TRUE){
 
-  data |> 
+  data2 <- data |> 
 
     # add temperature and precipitation levels
     mutate(temperature_level = case_when(siteID %in% c("Ulvehaugen", "Skjelingahaugen", "Lavisdalen", "Gudmedalen") ~ "alpine",
@@ -14,24 +14,31 @@ make_fancy_data <- function(data, gridded_climate){
                                              siteID %in% c("Vikesland", "Hogsete", "Lavisdalen") ~ 2,
                                              siteID %in% c("Arhelleren", "Rambera", "Gudmedalen") ~ 3,
                                              TRUE ~ 4)) |> 
-  
-  # convert treatment to FG present
-  # mutate(fg_remaining = case_when(
-  #     treatment == "C" ~ "FGB",
-  #     treatment == "FB" ~ "G",
-  #     treatment == "FGB" ~ "bare",
-  #     treatment == "GB" ~ "F",
-  #     treatment == "F" ~ "GB",
-  #     treatment == "GF" ~ "B",
-  #     treatment == "B" ~ "GF",
-  #     treatment == "G" ~ "FB",
-  #     treatment == "XC" ~ "FGB",
-  #     TRUE ~ NA_character_)
-  #   )
-
 
     # # add gridded climate data
     left_join(gridded_climate, by = "siteID")
+  
+  
+  if(fix_treatment == TRUE){
+
+     # convert treatment to FG present
+    data2 <- data2 |> 
+      mutate(fg_remaining = case_when(
+      treatment == "C" ~ "FGB",
+      treatment == "FB" ~ "G",
+      treatment == "FGB" ~ "bare",
+      treatment == "GB" ~ "F",
+      treatment == "F" ~ "GB",
+      treatment == "GF" ~ "B",
+      treatment == "B" ~ "GF",
+      treatment == "G" ~ "FB",
+      treatment == "XC" ~ "FGB",
+      TRUE ~ NA_character_))
+
+  } else {
+    data2 <- data2
+  }
+   
 
 }
 
