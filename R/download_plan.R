@@ -49,6 +49,12 @@ download_plan <- list(
     command =  read_csv(removed_biomass_download)
   ),
 
+    # forb biomass
+  tar_target(
+    name = removed_forb_biomass_raw,
+    command =  read_csv(removed_forb_biomass_download)
+  ),
+
   # community composition
   tar_target(
     name = community_raw,
