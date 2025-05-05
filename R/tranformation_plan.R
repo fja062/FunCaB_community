@@ -81,15 +81,9 @@ transformation_plan <- list(
     command = community_raw |>
       # remove extra plots in 2016
       filter(treatment != "XC") |>
-      select(year:treatment, species, cover, functional_group) |>
-      mutate(temperature_level = case_when(siteID %in% c("Ulvehaugen", "Skjelingahaugen", "Lavisdalen", "Gudmedalen") ~ "alpine",
-                                           siteID %in% c("Alrust", "Veskre", "Rambera", "Hogsete") ~ "sub-alpine",
-                                           TRUE ~ "boreal"),
-             temperature_level = factor(temperature_level, levels = c("alpine", "sub-alpine", "boreal")),
-             precipitation_level = case_when(siteID %in% c("Fauske", "Alrust", "Ulvehaugen") ~ 1,
-                                             siteID %in% c("Vikesland", "Hogsete", "Lavisdalen") ~ 2,
-                                             siteID %in% c("Arhelleren", "Rambera", "Gudmedalen") ~ 3,
-                                             TRUE ~ 4))
+      select(year:treatment, species, cover, functional_group) %>%
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      
   ),
 
 tar_target(
@@ -103,15 +97,54 @@ tar_target(
     dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, treatment)) |>
     tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
     # remove last duplicate
-    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2)) |>
-    mutate(temperature_level = case_when(siteID %in% c("Ulvehaugen", "Skjelingahaugen", "Lavisdalen", "Gudmedalen") ~ "alpine",
-                                         siteID %in% c("Alrust", "Veskre", "Rambera", "Hogsete") ~ "sub-alpine",
-                                         TRUE ~ "boreal"),
-           temperature_level = factor(temperature_level, levels = c("alpine", "sub-alpine", "boreal")),
-           precipitation_level = case_when(siteID %in% c("Fauske", "Alrust", "Ulvehaugen") ~ 1,
-                                           siteID %in% c("Vikesland", "Hogsete", "Lavisdalen") ~ 2,
-                                           siteID %in% c("Arhelleren", "Rambera", "Gudmedalen") ~ 3,
-                                           TRUE ~ 4))
+    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2)) %>% 
+    make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+
+),
+
+tar_target(
+  name = traits,
+  command = traits_raw |> 
+    select(-date, -flag) |> 
+
+    # log transform size traits
+    mutate(
+      value_trans = if_else(
+        trait %in% c(
+          "height",
+          "fresh_mass",
+          "dry_mass",
+          "leaf_area",
+          "leaf_thickness"
+        ),
+      true = suppressWarnings(log(value)),# suppress warnings from log(-value) in isotopes (these are calculated but not kept)
+      false = value
+    ),
+    trait_trans = recode(
+      trait,
+        "height" = "height_log",
+        "fresh_mass" = "fresh_mass_log",
+        "dry_mass" = "dry_mass_log",
+        "leaf_area" = "leaf_area_log",
+        "leaf_thickness" = "leaf_thickness_log"
+      ),
+    trait_trans = factor(trait_trans, 
+      levels = c("height_log", "fresh_mass_log", "dry_mass_log", "leaf_area_log", "leaf_thickness_log", "SLA", "LDMC", "C", "N", "CN_ratio", "d13C", "d15N"))) %>% 
+        make_fancy_data(., gridded_climate, fix_treatment = FALSE)
+
+),
+
+# bootstrapping
+# trait imputation
+tar_target(
+  name = imputed_traits,
+  command = make_trait_impute(cover, traits)
+),
+
+# bootstrapping for CWM
+tar_target(
+  name = trait_means,
+  command = make_bootstrapping(imputed_traits)
 )
 
 )
