@@ -12,6 +12,16 @@ download_plan <- list(
   format = "file"
   ),
 
+  # forb biomass
+  tar_target(
+    name = removed_forb_biomass_download,
+    command =  get_file(node = "34wur",
+                        file = "FunCaB_clean_species_biomass_2016.csv",
+                        path = "data",
+                        remote_path = "1_Biomass_removal"),
+  format = "file"
+  ),
+
   # community composition
   tar_target(
     name = community_download,
