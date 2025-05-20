@@ -10,7 +10,6 @@ fg_cover |>
 
 # load the forb biomass
 
-
 # biomass
 # FG cover in XC plots from 2016
 standing_biomass_test <- community_raw |>
