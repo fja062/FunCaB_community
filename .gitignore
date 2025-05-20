@@ -1,11 +1,7 @@
-# History files
+# --- RStudio project files ---
+.Rproj.user/
 .Rhistory
-.Rapp.history
-
-# Session Data files
 .RData
-
-# User-specific files
 .Ruserdata
 
 # Example code in package build process
@@ -39,7 +35,7 @@ vignettes/*.pdf
 .Renviron
 
 # target
-*_targets/
+_targets/
 
 # data files
 *.csv
@@ -63,3 +59,21 @@ vignettes/*.pdf
 *.md
 *.lua
 *.tex
+
+
+# --- R environment / package management ---
+.Renviron
+.Rprofile
+.packrat/
+renv/library/
+renv/python/
+renv/staging/
+renv.lock
+
+
+# --- Quarto or R Markdown cache / render ---
+*.nb.html
+*_files/
+*.utf8.md
+*.knit.md
+cache/
