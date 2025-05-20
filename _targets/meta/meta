@@ -12,10 +12,11 @@ cover|stem|b34a75208e3e6c81|91eb4f53034c079f|c39008b27863c5fd|-836577139||t20210
 community_pca|stem|1a74458b530aad36|cefaaf066c914c02|3f66d59a1d55fbef|565650732||t20210.5198341961s|s2447582b|2447582|rds|local|vector|||0.665||
 diversity|stem|f3a8c01ed6c6167a|ee06513c5e99aa24|8ad986196ec0b20d|385914567||t20210.5198427138s|s50262b|50262|rds|local|vector|||0.449||
 fg_cover|stem|390f206656d7389c|2acbe1c339bd3c7a|c39008b27863c5fd|14809132||t20210.5527179376s|s16630b|16630|rds|local|vector|||0.129||
+removed_forb_biomass_download|stem|ce20866d133b943a|eb0524f59880851a|2c530c1562a7fbd1|-1299766773|data/FunCaB_clean_species_biomass_2016.csv|t20213.3772889942s|s18737b|18737|file|local|vector|||4.902||
+removed_forb_biomass_raw|stem|211a8537c6faaa0b|7c71c11f3e035109|27255677132f49fd|1175849612||t20213.3772933139s|s2907b|2907|rds|local|vector|||0.271||
 make_sp_pca_figure|function|36cd79a80eec7c97
 calc_diversity|function|b233de918accafee
 make_diversity_figure|function|0791b9ad0ca98670
 get_fg_cover|function|710b6497325a4180
 make_sp_pca|function|0ba6ec59b90cff24
-removed_forb_biomass_download|stem|ce20866d133b943a|eb0524f59880851a|2c530c1562a7fbd1|-1299766773|data/FunCaB_clean_species_biomass_2016.csv|t20213.3772889942s|s18737b|18737|file|local|vector|||4.902||
-removed_forb_biomass_raw|stem|211a8537c6faaa0b|7c71c11f3e035109|27255677132f49fd|1175849612||t20213.3772933139s|s2907b|2907|rds|local|vector|||0.271||
+standing_forb_biomass|stem|127970c08033a88f|dc96c178d8ae07be|f3778e216fb7716a|-20868781||t20228.3636727934s|s2919b|2919|rds|local|vector|||0.019||
