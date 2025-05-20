@@ -40,10 +40,11 @@ transformation_plan <- list(
       filter(treatment != "XC") |>
       # remove 2020 data |>
       filter(year < 2020) |>
-      # sum biomass from different rounds
+      # sum biomass across years
       group_by(siteID, temperature_level, precipitation_level, blockID, plotID, treatment, removed_fg) |>
       summarise(removed_biomass = sum(biomass)) |>
-      ungroup()
+      ungroup() %>%
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
 
@@ -54,7 +55,8 @@ transformation_plan <- list(
     command = removed_biomass_raw |>
       # control plots in 2016
       filter(treatment == "XC") |>
-      rename(standing_biomass = biomass)
+      rename(standing_biomass = biomass) %>%
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
   # prep cover
@@ -147,6 +149,15 @@ tar_target(
 tar_target(
   name = trait_means,
   command = make_bootstrapping(imputed_traits)
-)
+),
 
+# join response and explanatory variables for analysis
+  tar_target(
+    name = analysis_data,
+    command = removed_biomass |>
+      #filter(year == 2019) |>
+      tidylog::anti_join(biomass_coefficients |> filter(year == 2019)) |>
+      left_join(trait_means) |>
+      left_join(diversity |> filter(year == 2019))
+  )
 )
