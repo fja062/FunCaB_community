@@ -5,13 +5,13 @@ analysis_plan <- list(
     tar_target(
       name = diversity,
       command = calc_diversity(cover)
-    ),
+    )
 
 
   # make pca
-  tar_target(
-    name = community_pca,
-    command = make_sp_pca(cover)
-  )
+  # tar_target(
+  #   name = community_pca,
+  #   command = make_sp_pca(cover)
+  # )
 
 )
