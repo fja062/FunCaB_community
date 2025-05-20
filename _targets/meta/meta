@@ -9,8 +9,6 @@ removed_biomass_raw|stem|efbafb6a0e57f46c|0293338882d2d41b|f40aa053c486b056|-168
 gridded_climate_raw|stem|d00c6af6b3cae1e6|0fd67ef76ab63d7c|32cc83fd7422374b|-1051878378||t20228.4169070322s|s711525b|711525|rds|local|vector|||0.356||
 community_raw|stem|ae3085a2802dadfb|7b1eaf45d3b9369c|7a332cc25c5a34c8|-940780254||t20228.4169118118s|s212707b|212707|rds|local|vector|||0.165||
 traits_raw|stem|f7289a33e467f01d|8f62cd00c6201446|6f75e0800dcedcb9|1488423680||t20228.4169159267s|s156145b|156145|rds|local|vector|||0.185||
-standing_forb_biomass|stem|127970c08033a88f|dc96c178d8ae07be|f3778e216fb7716a|-20868781||t20228.4169167241s|s2919b|2919|rds|local|vector|||0.023||
-removed_biomass|stem|4755d6e90c7e2198|f2897612d6a2cb56|47bc22cc12fd71e5|1291915252||t20228.4169187259s|s16458b|16458|rds|local|vector|||0.096||
 standing_biomass|stem|e83cb7f16cd1ae37|ab9e26bb0003b0be|47bc22cc12fd71e5|1167926235||t20228.4169197057s|s3148b|3148|rds|local|vector|||0.007||
 gridded_climate|stem|c60adad16505107b|bd659bec6a4f315c|f1701a26f3e19a3c|-1971992281||t20228.4169311646s|s461b|461|rds|local|vector|||0.726||
 trait_means|stem|82f6a69eb28fc5e0|747afe2d4b765621|571a9bcca4469ab3|27284142||t20228.4173298155s|s10414b|10414|rds|local|vector|||20.527||
@@ -21,6 +19,7 @@ fg_cover|stem|f29c09942852151c|293c8ad09f449ba0|ca4a4101c8dbdec9|14809132||t2022
 community|stem|c347b04c58c9a9c1|20f48b0609ec37eb|ca4a4101c8dbdec9|-522211339||t20228.4522176726s|s238799b|238799|rds|local|vector|||0.258||
 diversity|stem|c8172593e49434a6|ee06513c5e99aa24|4d8f8a147d5cd39d|385914567||t20228.4562818224s|s50987b|50987|rds|local|vector|||0.185||
 imputed_traits|stem|e36b3c40e5fe6afa|d3298d8fff73079e|54db8493eabf4299|-478720574||t20228.4564369111s|s1824507b|1824507|rds|local|vector|||10.565|other_col levels functional_group are in  names(traits). These columns will be removed from traits|
+removed_biomass|stem|ba3d833c4d716454|4ab95e2ad863bf21|47bc22cc12fd71e5|1291915252||t20228.5201573738s|s4580b|4580|rds|local|vector|||0.102||
 make_sp_pca_figure|function|36cd79a80eec7c97
 calc_diversity|function|76d689bcc3f493a6
 merge_community_biomass|function|94979f4e6ed4a456
@@ -32,4 +31,4 @@ make_trait_impute|function|9b920bac479f0a25
 make_sp_pca|function|0ba6ec59b90cff24
 make_biomass_coefficients|function|b25ea943bbe4cb2c
 make_bootstrapping|function|ee989fb7b01f5577
-remaining_biomass_merged|stem|e0c2a4b7600d787b|65e7f79e94b34d46|4bd8bf52085b1ef5|929503708||t20228.4492916665s||32382|rds|local|vector|||0.188||Can't select columns that don't exist. [31m✖[39m Column `treatment` doesn't exist.
+remaining_biomass_merged|stem|e0c2a4b7600d787b|65e7f79e94b34d46|4bd8bf52085b1ef5|929503708||t20228.4492916665s||32382|rds|local|vector|||0.179||Can't select columns that don't exist. [31m✖[39m Column `treatment` doesn't exist.
