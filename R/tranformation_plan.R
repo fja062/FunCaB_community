@@ -40,7 +40,7 @@ transformation_plan <- list(
       filter(treatment != "XC") |>
       # remove 2020 data |>
       filter(year < 2020) |>
-      # sum biomass from different rounds
+      # sum biomass across years
       group_by(siteID, temperature_level, precipitation_level, blockID, plotID, treatment, removed_fg) |>
       summarise(removed_biomass = sum(biomass)) |>
       ungroup()
