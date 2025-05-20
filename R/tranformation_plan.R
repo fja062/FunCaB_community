@@ -28,34 +28,48 @@ transformation_plan <- list(
     by = "siteID")
 
     }
-
-      ),
-
+  ),
 
   # prep biomass
   tar_target(
+    name = biomass,
+    command = removed_biomass_raw |> 
+    mutate(plotID = if_else(
+      treatment == "GF" & str_detect(plotID, "FG"),
+        str_replace(plotID, "FG", "GF"),
+        plotID)) %>% 
+    make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+  ),
+
+  # sum biomass between 2015 and 2019 (without XC)
+  tar_target(
     name = removed_biomass,
-    command = removed_biomass_raw |>
+    command = biomass |>
       # remove extra plots in 2016
-      filter(treatment != "XC") |>
+      filter(fg_removed != "XC") |>
       # remove 2020 data |>
       filter(year < 2020) |>
       # sum biomass across years
-      group_by(siteID, temperature_level, precipitation_level, blockID, plotID, treatment, removed_fg) |>
+      group_by(siteID, temperature_level, precipitation_level, blockID, plotID, fg_removed, removed_fg) |>
       summarise(removed_biomass = sum(biomass)) |>
-      ungroup() %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      ungroup()
   ),
 
 
-  # 2016 controls
+  # standing biomass for 2016 controls
   ### PROBLEM WITH THIS DATA, ONE DUPLICATE???
   tar_target(
     name = standing_biomass,
-    command = removed_biomass_raw |>
+    command = biomass |>
       # control plots in 2016
-      filter(treatment == "XC") |>
-      rename(standing_biomass = biomass) %>%
+      filter(fg_removed == "XC") |>
+      rename(standing_biomass = biomass)
+  ),
+
+  # make community data
+  tar_target(
+    name = community,
+    command = community_raw %>%
       make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
@@ -68,13 +82,6 @@ transformation_plan <- list(
       select(year:treatment, species, cover, functional_group) %>%
       make_fancy_data(., gridded_climate, fix_treatment = TRUE)
 
-  ),
-
-  # make community data
-  tar_target(
-    name = community,
-    command = community_raw %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
 tar_target(
