@@ -44,17 +44,6 @@ transformation_plan <- list(
       ungroup()
   ),
 
-  # prep forb biomass
-  tar_target(
-    name = removed_forb_biomass,
-    command = removed_forb_biomass_raw |>
-      # remove extra plots in 2016
-      filter(treatment != "XC") |>
-      # sum biomass from different rounds
-      group_by(year, siteID, temperature_level, precipitation_level, blockID, plotID, treatment, removed_fg) |>
-      summarise(removed_biomass = sum(biomass)) |>
-      ungroup()
-  ),
 
   # 2016 controls
   ### PROBLEM WITH THIS DATA, ONE DUPLICATE???
