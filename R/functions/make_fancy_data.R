@@ -2,27 +2,27 @@
 
 make_fancy_data <- function(data, gridded_climate, fix_treatment = TRUE){
 
-  data2 <- data |> 
+  data2 <- data |>
 
     # add temperature and precipitation levels
     mutate(temperature_level = case_when(siteID %in% c("Ulvehaugen", "Skjelingahaugen", "Lavisdalen", "Gudmedalen") ~ "alpine",
                                           siteID %in% c("Alrust", "Veskre", "Rambera", "Hogsete") ~ "sub-alpine",
                                           TRUE ~ "boreal"),
-          temperature_level = factor(temperature_level, 
+          temperature_level = factor(temperature_level,
             levels = c("alpine", "sub-alpine", "boreal")),
           precipitation_level = case_when(siteID %in% c("Fauske", "Alrust", "Ulvehaugen") ~ 1,
                                              siteID %in% c("Vikesland", "Hogsete", "Lavisdalen") ~ 2,
                                              siteID %in% c("Arhelleren", "Rambera", "Gudmedalen") ~ 3,
-                                             TRUE ~ 4)) |> 
+                                             TRUE ~ 4)) |>
 
     # # add gridded climate data
     left_join(gridded_climate, by = "siteID")
-  
-  
+
+
   if(fix_treatment == TRUE){
 
      # convert treatment to FG present
-    data2 <- data2 |> 
+    data2 <- data2 |>
       mutate(fg_remaining = case_when(
       treatment == "C" ~ "FGB",
       treatment == "FB" ~ "G",
@@ -33,12 +33,13 @@ make_fancy_data <- function(data, gridded_climate, fix_treatment = TRUE){
       treatment == "B" ~ "GF",
       treatment == "G" ~ "FB",
       treatment == "XC" ~ "FGB",
-      TRUE ~ NA_character_))
+      TRUE ~ NA_character_)) |>
+      rename(fg_removed = treatment)
 
   } else {
     data2 <- data2
   }
-   
+
 
 }
 
@@ -62,7 +63,7 @@ fancy_trait_name_dictionary <- function(dat){
       C = "C %",
       CN_ratio = "CN",
       d13C = "δC13 ‰",
-      d15N = "δN15 ‰")) |> 
+      d15N = "δN15 ‰")) |>
     # make names that can be used in figures with unit
         mutate(figure_names = case_when(
           trait_trans == "height_log" ~ "Plant~height~(cm)",
@@ -77,19 +78,19 @@ fancy_trait_name_dictionary <- function(dat){
           trait_trans == "CN_ratio" ~ "CN",
           trait_trans == "d13C" ~ "δ^{13}~C~'(‰)'",
           trait_trans == "d15N" ~ "δ^{15}~N~'(‰)'"
-        )) |> 
-    
+        )) |>
+
     # order for trait_trans
-    mutate(trait_trans = factor(trait_trans, 
-          levels = c("height_log", "fresh_mass_log", "dry_mass_log", "leaf_area_log", "leaf_thickness_log", "LDMC", "SLA", "C", "N", "CN_ratio", "d13C", "d15N"))) |> 
+    mutate(trait_trans = factor(trait_trans,
+          levels = c("height_log", "fresh_mass_log", "dry_mass_log", "leaf_area_log", "leaf_thickness_log", "LDMC", "SLA", "C", "N", "CN_ratio", "d13C", "d15N"))) |>
 
     # order for figure names
     mutate(figure_names = factor(figure_names,
-                                 levels = c("Plant~height~(cm)", 
-                                 "Leaf~dry~mass~(g)", 
-                                 "Leaf~area~(cm^2)", 
-                                 "Leaf~thickness~(mm)", 
-                                 "SLA~(cm^2*g^{-1})", 
+                                 levels = c("Plant~height~(cm)",
+                                 "Leaf~dry~mass~(g)",
+                                 "Leaf~area~(cm^2)",
+                                 "Leaf~thickness~(mm)",
+                                 "SLA~(cm^2*g^{-1})",
                                  "LDMC~(gg^{-1})",
                                  "C~('%')",
                                  "N~('%')",
@@ -101,5 +102,5 @@ fancy_trait_name_dictionary <- function(dat){
                              trait_trans %in% c("d13C", "d15N") ~ "Isotopes",
                              TRUE ~ "Leaf economics"),
            class = factor(class, levels = c("Size", "Leaf economics", "Isotopes")))
-  
+
 }
