@@ -17,9 +17,9 @@ merge_community_biomass <- function(community, standing_biomass){
   separate_wider_delim(functional_group, delim = "_", names = c("trait", "functional_group")) |>
   pivot_wider(names_from = trait, values_from = cover) |>
   select(-blockID) |>
-  left_join(
+  tidylog::left_join(
     standing_biomass |>
-      select(siteID, temperature_level, precipitation_level, blockID, plotID, functional_group, standing_biomass) |>
+      select(siteID, plotID, functional_group, standing_biomass) |> #blockID,
       filter(functional_group %in% c("graminoids", "forb" , "bryophytes")) |>
       mutate(functional_group = case_when(
         plotID == "Hog1XC" & standing_biomass == 29.44 ~ "graminoids",
