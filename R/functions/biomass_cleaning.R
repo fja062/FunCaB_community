@@ -3,10 +3,10 @@
 merge_community_biomass <- function(community, standing_biomass){
   standing_biomass_merged <- community |>
   #filter(treatment == "XC") |>
-  select(year:treatment, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
+  select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
   tidylog::distinct() |>
   #remove duplicates
-  dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, treatment)) |>
+  dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, fg_removed)) |>
   tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
   tidylog::filter(!c(plotID == "Alr3C" & year == 2016 & vegetation_height > 80)) |>
   tidylog::filter(!c(plotID == "Alr3C" & year == 2017 & vegetation_height > 83)) |>
@@ -90,7 +90,7 @@ lm_graminoid <- summary(lm(standing_biomass ~ 0 + total, data = standing_biomass
 
 # create biomass estimates
 biomass_coefficients <- standing_biomass_merged |>
-  filter(!treatment == "XC") |>
+  filter(!fg_removed == "XC") |>
   mutate(standing_biomass_calculated = case_when(
     functional_group == "graminoids" ~ total*lm_graminoid$Estimate,
     functional_group == "forbs" ~ total*lm_forb$Estimate,
