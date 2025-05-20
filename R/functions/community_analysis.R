@@ -1,9 +1,9 @@
 ### community analysis functions
 
 calc_diversity <- function(cover){
-  
+
   cover %>%
-     group_by(year, siteID, blockID, plotID, removal, treatment, 
+     group_by(year, siteID, blockID, plotID, removal, fg_removed, fg_remaining,
       functional_group, temperature_level, precipitation_level) %>%
      summarise(richness = n(),
                diversity = diversity(cover),
@@ -40,15 +40,15 @@ make_sp_pca <- function(cover){
   return(list(out, sp, res))
 
 }
-  
+
 get_fg_cover <- function(fg_cover){
 
-  fg_cover |> 
-    select(year:treatment, graminoid = total_graminoids, forb = total_forbs, 
-      bryophyte = total_bryophytes) |> 
-    pivot_wider(names_from = treatment, 
-                values_from = c(graminoid, forb, bryophyte)) |> 
+  fg_cover |>
+    select(year:treatment, graminoid = total_graminoids, forb = total_forbs,
+      bryophyte = total_bryophytes) |>
+    pivot_wider(names_from = treatment,
+                values_from = c(graminoid, forb, bryophyte)) |>
     pivot_longer()
-  
+
 }
 

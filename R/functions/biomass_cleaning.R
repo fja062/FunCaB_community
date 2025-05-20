@@ -1,18 +1,7 @@
-# cover
-## correct height data of specific plots
-fg_cover |>
-  mutate(vegetation_height = case_when(
-  plotID == "Ram4F" & year == 2015 ~ 80,
-  plotID == "Alr2C" & year == 2015 ~ 197.5,
-  TRUE ~ vegetation_height
-  )
-)
-
-# load the forb biomass
-
 # biomass
 # FG cover in XC plots from 2016
-standing_biomass_test <- community_raw |>
+merge_community_biomass <- function(community, standing_biomass){
+  standing_biomass_merged <- community |>
   #filter(treatment == "XC") |>
   select(year:treatment, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
   tidylog::distinct() |>
@@ -22,14 +11,6 @@ standing_biomass_test <- community_raw |>
   tidylog::filter(!c(plotID == "Alr3C" & year == 2016 & vegetation_height > 80)) |>
   tidylog::filter(!c(plotID == "Alr3C" & year == 2017 & vegetation_height > 83)) |>
   # remove last duplicate
-  mutate(temperature_level = case_when(siteID %in% c("Ulvehaugen", "Skjelingahaugen", "Lavisdalen", "Gudmedalen") ~ "alpine",
-                                       siteID %in% c("Alrust", "Veskre", "Rambera", "Hogsete") ~ "sub-alpine",
-                                       TRUE ~ "boreal"),
-         temperature_level = factor(temperature_level, levels = c("alpine", "sub-alpine" , "boreal")),
-         precipitation_level = case_when(siteID %in% c("Fauske", "Alrust", "Ulvehaugen") ~ 1,
-                                         siteID %in% c("Vikesland", "Hogsete", "Lavisdalen") ~ 2,
-                                         siteID %in% c("Arhelleren", "Rambera", "Gudmedalen") ~ 3,
-                                         TRUE ~ 4)) |>
   mutate(height_forbs = vegetation_height) |>
   rename(height_graminoids = vegetation_height) |>
   pivot_longer(c(height_graminoids, height_forbs, total_graminoids, total_bryophytes, total_forbs), names_to = "functional_group", values_to = "cover") |>
@@ -58,6 +39,8 @@ standing_biomass_test <- community_raw |>
   )
 ) |>
   ungroup()
+
+}
 
 ######## biomass regressions
 #standing_biomass_test |>
@@ -99,16 +82,14 @@ standing_biomass_test <- community_raw |>
 #
 #ggsave(filename = "~/OneDrive - University of Bergen/research/FunCaB/paper 2/figuressupFig_1#.jpg", dpi = 300, width = 9, height = 6)
 
+make_biomass_coefficients <- function(standing_biomass_merged){
 # linear model by functional group
-lm_forb <- summary(lm(standing_biomass ~ 0 + total, data = standing_biomass_test |> filter(functional_group == "forbs")))$coefficients %>% as_tibble()
-lm_bryophyte <- summary(lm(standing_biomass ~ 0 + cover_height, data = standing_biomass_test |> filter(functional_group == "bryophytes")))$coefficients %>% as_tibble()
-lm_graminoid <- summary(lm(standing_biomass ~ 0 + total, data = standing_biomass_test |> filter(functional_group == "graminoids")))$coefficients %>% as_tibble()
-
-coefficients <- bind_rows("forbs" = lm_forb, "graminoids" = lm_graminoid, "bryophytes" = lm_bryophyte, .id = "functional_group")
-
+lm_forb <- summary(lm(standing_biomass ~ 0 + total, data = standing_biomass_merged |> filter(functional_group == "forbs")))$coefficients %>% as_tibble()
+lm_bryophyte <- summary(lm(standing_biomass ~ 0 + cover_height, data = standing_biomass_merged |> filter(functional_group == "bryophytes")))$coefficients %>% as_tibble()
+lm_graminoid <- summary(lm(standing_biomass ~ 0 + total, data = standing_biomass_merged |> filter(functional_group == "graminoids")))$coefficients %>% as_tibble()
 
 # create biomass estimates
-standing_biomass_test |>
+biomass_coefficients <- standing_biomass_merged |>
   filter(!treatment == "XC") |>
   mutate(standing_biomass_calculated = case_when(
     functional_group == "graminoids" ~ total*lm_graminoid$Estimate,
@@ -116,3 +97,5 @@ standing_biomass_test |>
     functional_group == "bryophytes" ~ total*lm_bryophyte$Estimate
   )
 )
+}
+

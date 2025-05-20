@@ -55,15 +55,6 @@ transformation_plan <- list(
       rename(standing_biomass = biomass)
   ),
 
-    # 2016 controls - forbs
-  tar_target(
-    name = standing_forb_biomass,
-    command = removed_forb_biomass_raw |>
-      # control plots in 2016
-      filter(treatment == "XC") |>
-      rename(standing_biomass = biomass)
-  ),
-
   # prep cover
   tar_target(
     name = cover,
@@ -72,7 +63,14 @@ transformation_plan <- list(
       filter(treatment != "XC") |>
       select(year:treatment, species, cover, functional_group) %>%
       make_fancy_data(., gridded_climate, fix_treatment = TRUE)
-      
+
+  ),
+
+  # make community data
+  tar_target(
+    name = community,
+    command = community_raw %>%
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
 tar_target(
@@ -86,15 +84,28 @@ tar_target(
     dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, treatment)) |>
     tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
     # remove last duplicate
-    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2)) %>% 
+    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2)) %>%
     make_fancy_data(., gridded_climate, fix_treatment = TRUE)
 
 ),
 
+  #merge biomass with community
+  tar_target(
+    name = remaining_biomass_merged,
+    command = merge_community_biomass(community, standing_biomass)
+  ),
+
+  # make biomass coefficients
+  tar_target(
+    name = biomass_coefficients,
+    command = make_biomass_coefficients(remaining_biomass_merged)
+  ),
+
+
 tar_target(
   name = traits,
-  command = traits_raw |> 
-    select(-date, -flag) |> 
+  command = traits_raw |>
+    select(-date, -flag) |>
 
     # log transform size traits
     mutate(
@@ -117,8 +128,8 @@ tar_target(
         "leaf_area" = "leaf_area_log",
         "leaf_thickness" = "leaf_thickness_log"
       ),
-    trait_trans = factor(trait_trans, 
-      levels = c("height_log", "fresh_mass_log", "dry_mass_log", "leaf_area_log", "leaf_thickness_log", "SLA", "LDMC", "C", "N", "CN_ratio", "d13C", "d15N"))) %>% 
+    trait_trans = factor(trait_trans,
+      levels = c("height_log", "fresh_mass_log", "dry_mass_log", "leaf_area_log", "leaf_thickness_log", "SLA", "LDMC", "C", "N", "CN_ratio", "d13C", "d15N"))) %>%
         make_fancy_data(., gridded_climate, fix_treatment = FALSE)
 
 ),

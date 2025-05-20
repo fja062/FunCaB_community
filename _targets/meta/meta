@@ -1,30 +1,35 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-community_download|stem|afa6d5d3608a4b01|0601c06c9e859689|2c530c1562a7fbd1|-508782454|data/FunCaB_clean_composition_2015-2019.csv|t19489.2998263889s|s1397248b|1397248|file|local|vector|||1.48||
-community_raw|stem|9be909489cfcc955|7b1eaf45d3b9369c|7a332cc25c5a34c8|-940780254||t20193.4654338342s|s212705b|212705|rds|local|vector|||0.042||
-gridded_climate_download|stem|20fa632554be1b80|d578bb40d90afcac|2c530c1562a7fbd1|-1517065226|data/VCG_clean_gridded_daily_climate_2008-2022.csv|t20210.4281479263s|s11259911b|11259911|file|local|vector|||2.34||
-gridded_climate_raw|stem|b71f493745455fd0|0fd67ef76ab63d7c|32cc83fd7422374b|-1051878378||t20210.4291670085s|s711525b|711525|rds|local|vector|||0.371||
-gridded_climate|stem|a520d5faf11c08f9|bd659bec6a4f315c|54b587bab072d9ec|-1971992281||t20210.4428523298s|s467b|467|rds|local|vector|||0.19||
-removed_biomass_download|stem|4fea80471bac8c7c|916628b7d8dbf9e3|2c530c1562a7fbd1|2005804525|data/FunCaB_clean_biomass_2015-2021.csv|t19489.3000115741s|s391054b|391054|file|local|vector|||3.64||
-removed_biomass_raw|stem|1e7553bb248083a6|0293338882d2d41b|f40aa053c486b056|-1688832183||t20210.4519362974s|s28590b|28590|rds|local|vector|||0.299||
-removed_biomass|stem|3b60fc6ccd0b1071|f2897612d6a2cb56|8a70cf089b304182|1291915252||t20210.4519369961s|s16457b|16457|rds|local|vector|||0.021||
-standing_biomass|stem|bda653b2aeb77d64|ab9e26bb0003b0be|8a70cf089b304182|1167926235||t20210.4519371891s|s3146b|3146|rds|local|vector|||0.003||
-traits_download|stem|fe5fafd60e4fdb36|568f67a0220b112a|2c530c1562a7fbd1|-581491708|data/VCG_clean_trait_data_2012-2016.csv|t20210.5504534405s|s1657550b|1657550|file|local|vector|||2.048||
-traits_raw|stem|ac55919de6439c75|8f62cd00c6201446|6f75e0800dcedcb9|1488423680||t20210.5541692185s|s156145b|156145|rds|local|vector|||0.352||
-.Random.seed|object|89c75f8d2bcf1c8e|||||||||||||||
-dat|object|15a6b8e13f1ec3d5|||||||||||||||
-cover|stem|c18b96e87c02a568|9d810ebb88ee990f|b29add03aae05cdb|-836577139||t20213.8136620198s|s100527b|100527|rds|local|vector|||0.03||
-traits|stem|f5083d30cc16aa23|e946c354b4cdfb2d|093364f3cde0070f|-223241305||t20213.8136637785s|s316194b|316194|rds|local|vector|||0.031||
-fg_cover|stem|a2104f27f2a8b03b|293c8ad09f449ba0|b29add03aae05cdb|14809132||t20213.8136657989s|s18789b|18789|rds|local|vector|||0.094||
-community_pca|stem|535e30470d3c685d|cefaaf066c914c02|af3a1368bddc627f|565650732||t20213.5315246715s||1635518|rds|local|vector|||0.1||'x' must be numeric
-diversity|stem|e396dbc6d21b2bac|ee06513c5e99aa24|4ba3bed6f28fd673|385914567||t20213.8139983074s|s50266b|50266|rds|local|vector|||0.066||
-imputed_traits|stem|61fc650d92643be6|d3298d8fff73079e|179a2378f17a7b55|-478720574||t20213.8140623715s|s1824664b|1824664|rds|local|vector|||4.377|other_col levels functional_group are in  names(traits). These columns will be removed from traits|
-trait_means|stem|17e3865a83da869a|747afe2d4b765621|dd28c3e381e24ab6|27284142||t20213.8141652402s|s10418b|10418|rds|local|vector|||8.227||
+removed_forb_biomass_download|stem|ce20866d133b943a|eb0524f59880851a|2c530c1562a7fbd1|-1299766773|data/FunCaB_clean_species_biomass_2016.csv|t20213.3772889942s|s18737b|18737|file|local|vector|||4.502||
+removed_biomass_download|stem|4fea80471bac8c7c|916628b7d8dbf9e3|2c530c1562a7fbd1|2005804525|data/FunCaB_clean_biomass_2015-2021.csv|t20210.5197120193s|s391054b|391054|file|local|vector|||3.64||
+gridded_climate_download|stem|20fa632554be1b80|d578bb40d90afcac|2c530c1562a7fbd1|-1517065226|data/VCG_clean_gridded_daily_climate_2008-2022.csv|t20210.5197382808s|s11259911b|11259911|file|local|vector|||2.34||
+community_download|stem|afa6d5d3608a4b01|0601c06c9e859689|2c530c1562a7fbd1|-508782454|data/FunCaB_clean_composition_2015-2019.csv|t20210.51977173s|s1397248b|1397248|file|local|vector|||1.48||
+traits_download|stem|fe5fafd60e4fdb36|568f67a0220b112a|2c530c1562a7fbd1|-581491708|data/VCG_clean_trait_data_2012-2016.csv|t20228.3905021285s|s1657550b|1657550|file|local|vector|||2.048||
+removed_forb_biomass_raw|stem|211a8537c6faaa0b|7c71c11f3e035109|27255677132f49fd|1175849612||t20228.4168929351s|s2907b|2907|rds|local|vector|||0.433||
+removed_biomass_raw|stem|efbafb6a0e57f46c|0293338882d2d41b|f40aa053c486b056|-1688832183||t20228.4168964866s|s28591b|28591|rds|local|vector|||0.136||
+gridded_climate_raw|stem|d00c6af6b3cae1e6|0fd67ef76ab63d7c|32cc83fd7422374b|-1051878378||t20228.4169070322s|s711525b|711525|rds|local|vector|||0.356||
+community_raw|stem|ae3085a2802dadfb|7b1eaf45d3b9369c|7a332cc25c5a34c8|-940780254||t20228.4169118118s|s212707b|212707|rds|local|vector|||0.165||
+traits_raw|stem|f7289a33e467f01d|8f62cd00c6201446|6f75e0800dcedcb9|1488423680||t20228.4169159267s|s156145b|156145|rds|local|vector|||0.185||
+standing_forb_biomass|stem|127970c08033a88f|dc96c178d8ae07be|f3778e216fb7716a|-20868781||t20228.4169167241s|s2919b|2919|rds|local|vector|||0.023||
+removed_biomass|stem|4755d6e90c7e2198|f2897612d6a2cb56|47bc22cc12fd71e5|1291915252||t20228.4169187259s|s16458b|16458|rds|local|vector|||0.096||
+standing_biomass|stem|e83cb7f16cd1ae37|ab9e26bb0003b0be|47bc22cc12fd71e5|1167926235||t20228.4169197057s|s3148b|3148|rds|local|vector|||0.007||
+gridded_climate|stem|c60adad16505107b|bd659bec6a4f315c|f1701a26f3e19a3c|-1971992281||t20228.4169311646s|s461b|461|rds|local|vector|||0.726||
+imputed_traits|stem|d13641486102071e|d3298d8fff73079e|5600aa9b26ad6597|-478720574||t20228.4170759034s|s1824521b|1824521|rds|local|vector|||8.911|other_col levels functional_group are in  names(traits). These columns will be removed from traits|
+trait_means|stem|82f6a69eb28fc5e0|747afe2d4b765621|571a9bcca4469ab3|27284142||t20228.4173298155s|s10414b|10414|rds|local|vector|||20.527||
+remaining_biomass_merged|stem|e0c2a4b7600d787b|65e7f79e94b34d46|2536f2e1c9bd72c3|929503708||t20228.4492916665s|s32382b|32382|rds|local|vector|||1.477||
+biomass_coefficients|stem|3eecb0452d289dbb|07e8f6771d2a9320|c5853eccd5b22726|1598719289||t20228.4492988658s|s37332b|37332|rds|local|vector|||0.156||
 make_sp_pca_figure|function|36cd79a80eec7c97
 calc_diversity|function|b233de918accafee
+merge_community_biomass|function|94979f4e6ed4a456
 fancy_trait_name_dictionary|function|08e059bc96f1d541
 make_diversity_figure|function|0791b9ad0ca98670
 get_fg_cover|function|710b6497325a4180
-make_fancy_data|function|39be8e68e4d732e7
+make_fancy_data|function|fcb4593070fec530
 make_trait_impute|function|9b920bac479f0a25
 make_sp_pca|function|0ba6ec59b90cff24
+make_biomass_coefficients|function|b25ea943bbe4cb2c
 make_bootstrapping|function|ee989fb7b01f5577
+cover|stem|f21aa5648d6e0c44|9d810ebb88ee990f|ca4a4101c8dbdec9|-836577139||t20228.4521947726s|s100514b|100514|rds|local|vector|||0.149||
+traits|stem|2b7dce8b8137ab14|e946c354b4cdfb2d|27488c79fe402d52|-223241305||t20228.4522005852s|s316183b|316183|rds|local|vector|||0.115||
+fg_cover|stem|f29c09942852151c|293c8ad09f449ba0|ca4a4101c8dbdec9|14809132||t20228.4522059111s|s18781b|18781|rds|local|vector|||0.179||
+community|stem|c347b04c58c9a9c1|20f48b0609ec37eb|ca4a4101c8dbdec9|-522211339||t20228.4522176726s|s238799b|238799|rds|local|vector|||0.258||
+diversity|stem|f3a8c01ed6c6167a|ee06513c5e99aa24|5278b1d49850e89c|385914567||t20228.4169440087s||50262|rds|local|vector|||0.134||[1m[22mMust group by variables found in `.data`. [31m✖[39m Column `treatment` is not found.
