@@ -21,7 +21,7 @@ make_trait_impute <- function(cover, traits){
     value_col = "value_trans",
     trait_col = "trait_trans", 
     abundance_col = "cover",
-    other_col = c("functional_group", "temperature_level", "precipitation_level", "temperature", "precipitation"),
+    other_col = c("blockID", "plotID", "fg_removed", "fg_remaining"),
     min_n_in_sample = 2
   )
   

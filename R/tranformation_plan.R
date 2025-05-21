@@ -28,68 +28,76 @@ transformation_plan <- list(
     by = "siteID")
 
     }
-
-      ),
-
+  ),
 
   # prep biomass
   tar_target(
+    name = biomass,
+    command = removed_biomass_raw |> 
+    mutate(plotID = if_else(
+      treatment == "GF" & str_detect(plotID, "FG"),
+        str_replace(plotID, "FG", "GF"),
+        plotID)) %>% 
+    # fix blockID
+    funcabization(., convert_to = "Funder") %>%
+    make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+  ),
+
+  # sum biomass between 2015 and 2019 (without XC)
+  tar_target(
     name = removed_biomass,
-    command = removed_biomass_raw |>
+    command = biomass |>
       # remove extra plots in 2016
-      filter(treatment != "XC") |>
+      filter(fg_removed != "XC") |>
       # remove 2020 data |>
       filter(year < 2020) |>
       # sum biomass across years
-      group_by(siteID, temperature_level, precipitation_level, blockID, plotID, treatment, removed_fg) |>
+      group_by(siteID, temperature_level, precipitation_level, blockID, plotID, fg_removed, removed_fg) |>
       summarise(removed_biomass = sum(biomass)) |>
-      ungroup() %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      ungroup()
   ),
 
 
-  # 2016 controls
+  # standing biomass for 2016 controls
   ### PROBLEM WITH THIS DATA, ONE DUPLICATE???
   tar_target(
     name = standing_biomass,
-    command = removed_biomass_raw |>
+    command = biomass |>
       # control plots in 2016
-      filter(treatment == "XC") |>
-      rename(standing_biomass = biomass) %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
-  ),
-
-  # prep cover
-  tar_target(
-    name = cover,
-    command = community_raw |>
-      # remove extra plots in 2016
-      filter(treatment != "XC") |>
-      select(year:treatment, species, cover, functional_group) %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
-
+      filter(fg_removed == "XC") |>
+      rename(standing_biomass = biomass)
   ),
 
   # make community data
   tar_target(
     name = community,
     command = community_raw %>%
+      funcabization(., convert_to = "Funder") %>%
       make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+  ),
+
+  # prep cover
+  tar_target(
+    name = cover,
+    command = community |>
+      # remove extra plots in 2016
+      filter(fg_removed != "XC") |>
+      select(year:fg_removed, species, cover, functional_group, temperature_level:fg_remaining)
+
   ),
 
 tar_target(
   name = fg_cover,
-  command = community_raw |>
+  command = community |>
     # remove extra plots in 2016
-    filter(treatment != "XC") |>
-    select(year:treatment, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
+    filter(fg_removed != "XC") |>
+    select(year:fg_removed, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
     tidylog::distinct() |>
     #remove duplicates
-    dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, treatment)) |>
+    dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, fg_removed)) |>
     tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
     # remove last duplicate
-    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2)) %>%
-    make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2))
 
 ),
 
@@ -154,10 +162,45 @@ tar_target(
 # join response and explanatory variables for analysis
   tar_target(
     name = analysis_data,
-    command = removed_biomass |>
-      #filter(year == 2019) |>
-      tidylog::anti_join(biomass_coefficients |> filter(year == 2019)) |>
-      left_join(trait_means) |>
-      left_join(diversity |> filter(year == 2019))
+    command = biomass_coefficients |> 
+      # filter for only 2019 data
+      filter(year == 2019) |>
+      
+      # join with removed biomass
+      # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
+      # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
+      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |> 
+      # add missing blockID for control plots
+      mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
+      
+      # join with diversity
+      tidylog::left_join(diversity |> 
+        ungroup() |> 
+        filter(year == 2019) |> 
+        select(-removal, -functional_group, -c(temperature_level:temperature)),
+          by = join_by(year, siteID, plotID, fg_removed, fg_remaining))
+      
+  ),
+
+  # join response and explanatory variables for trait analysis
+  tar_target(
+    name = analysis_traits,
+    command = biomass_coefficients |> 
+      # filter for only 2019 data
+      filter(year == 2019) |>
+      
+      # join with removed biomass
+      # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
+      # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
+      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |> 
+      # add missing blockID for control plots
+      mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |> 
+
+      # join with traits
+      # WHY DO 720 NOT JOIN???!!!
+      tidylog::anti_join(trait_means)
+      
   )
+
 )
+

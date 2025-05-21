@@ -3,11 +3,10 @@
 calc_diversity <- function(cover){
 
   cover %>%
-     group_by(year, siteID, blockID, plotID, removal, fg_removed, fg_remaining,
-      functional_group, temperature_level, precipitation_level) %>%
-     summarise(richness = n(),
-               diversity = diversity(cover),
-               evenness = diversity/log(richness))
+    group_by(year, siteID, blockID, plotID, removal, fg_removed, fg_remaining, functional_group, temperature_level, precipitation_level, precipitation, temperature) |> 
+    summarise(richness = n(),
+              diversity = diversity(cover),
+              evenness = diversity/log(richness))
 }
 
 
