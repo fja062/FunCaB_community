@@ -20,6 +20,8 @@ merge_community_biomass <- function(community, standing_biomass){
   pivot_longer(c(height_graminoids, height_forbs, total_graminoids, total_bryophytes, total_forbs), names_to = "functional_group", values_to = "cover") |>
   separate_wider_delim(functional_group, delim = "_", names = c("trait", "functional_group")) |>
   ### THERE ARE DUPLICATES IN THE COMMUNITY DATA, CANNOT MAKE PIVOT WIDER ANYMORE
+  # there are duplicates in: Gud1XC, Fau2XC, Gud3XC (remove for now, but this should be fixed!!!)
+  filter(!plotID %in% c("Gud1XC", "Fau2XC", "Gud3XC")) |> 
   pivot_wider(names_from = trait, values_from = cover) |>
   select(-blockID) |>
   tidylog::left_join(
