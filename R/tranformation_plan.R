@@ -38,6 +38,8 @@ transformation_plan <- list(
       treatment == "GF" & str_detect(plotID, "FG"),
         str_replace(plotID, "FG", "GF"),
         plotID)) %>% 
+    # fix blockID
+    funcabization(., convert_to = "Funder") %>%
     make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
@@ -70,6 +72,7 @@ transformation_plan <- list(
   tar_target(
     name = community,
     command = community_raw %>%
+      funcabization(., convert_to = "Funder") %>%
       make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
@@ -161,10 +164,42 @@ tar_target(
 # join response and explanatory variables for analysis
   tar_target(
     name = analysis_data,
-    command = removed_biomass |>
-      #filter(year == 2019) |>
-      tidylog::anti_join(biomass_coefficients |> filter(year == 2019)) |>
-      left_join(trait_means) |>
-      left_join(diversity |> filter(year == 2019))
+    command = biomass_coefficients |> 
+      # filter for only 2019 data
+      filter(year == 2019) |>
+      
+      # join with removed biomass
+      # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
+      # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
+      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |> 
+      
+      # join with diversity
+      tidylog::left_join(diversity |> 
+        ungroup() |> 
+        filter(year == 2019) |> 
+        select(-removal, -functional_group, -blockID, -c(temperature_level:temperature)),
+          by = join_by(year, siteID, plotID, fg_removed, fg_remaining))
+      
+  ),
+
+  # join response and explanatory variables for trait analysis
+  tar_target(
+    name = analysis_traits,
+    command = biomass_coefficients |> 
+      # filter for only 2019 data
+      filter(year == 2019) |>
+      
+      # join with removed biomass
+      # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
+      # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
+      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |> 
+
+      # join with traits
+      # UNCLEAR WHY SO MANY DO NOT MATCH!!!
+      tidylog::left_join(trait_means |> 
+        select(-blockID))
+      
   )
+
 )
+
