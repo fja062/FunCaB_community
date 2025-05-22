@@ -12,16 +12,6 @@ download_plan <- list(
   format = "file"
   ),
 
-  # forb biomass
-  tar_target(
-    name = removed_forb_biomass_download,
-    command =  get_file(node = "4C5V2",
-                        file = "FunCaB_clean_species_biomass_2016.csv",
-                        path = "data",
-                        remote_path = "1_Biomass_removal"),
-  format = "file"
-  ),
-
   # community composition
   tar_target(
     name = community_download,
@@ -57,12 +47,6 @@ download_plan <- list(
   tar_target(
     name = removed_biomass_raw,
     command =  read_csv(removed_biomass_download)
-  ),
-
-    # forb biomass
-  tar_target(
-    name = removed_forb_biomass_raw,
-    command =  read_csv(removed_forb_biomass_download)
   ),
 
   # community composition
