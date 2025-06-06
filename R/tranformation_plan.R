@@ -93,7 +93,7 @@ transformation_plan <- list(
         # keep only the TTC controls in Alrust
       filter(!(plotID == "Alr3C" & is.na(turfID))) %>%
       funcabization(., convert_to = "Funder") %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE) %>%
         select(-sumcover) |>
         ungroup()
 
