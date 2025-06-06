@@ -69,8 +69,6 @@ transformation_plan <- list(
   ),
 
 
-# 2 use sum of covers when fg cover is missing, *according to n of forbs*
-
   # make community data
   tar_target(
     name = community,
@@ -89,9 +87,15 @@ transformation_plan <- list(
         (is.na(moss_height) & total_bryophytes <= 5) ~ 0,
         TRUE ~ moss_height
       )) |>
-      filter(!(plotID == "Alr3C" & is.na(turfID))) %>% # keep only the TTC controls in Alrust
+        # create sum of covers
+        group_by(year, plotID, functional_group) |>
+        mutate(sum_cover = sum(cover)) |>
+        # keep only the TTC controls in Alrust
+      filter(!(plotID == "Alr3C" & is.na(turfID))) %>%
       funcabization(., convert_to = "Funder") %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
+        select(-sumcover) |>
+        ungroup()
 
       impute_ctrls <- transition_community |>
         left_join(
@@ -108,7 +112,7 @@ transformation_plan <- list(
         select(-moss_height2) |>
         ungroup()
 
-      impute_ctrls |>
+      impute_trts <- impute_ctrls |>
         left_join(impute_ctrls |>
         select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
         tidylog::distinct() |>
