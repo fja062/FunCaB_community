@@ -134,12 +134,11 @@ transformation_plan <- list(
 
   # prep cover
   tar_target(
-    name = cover,
+    name = cover_data,
     command = community |>
       # remove extra plots in 2016
-      filter(fg_removed != "XC") |>
+      filter(fg_removed != "XC") |> 
       select(year:fg_removed, species, cover, functional_group, temperature_level:fg_remaining)
-
   ),
 
 tar_target(
@@ -206,7 +205,7 @@ tar_target(
 # trait imputation
 tar_target(
   name = imputed_traits,
-  command = make_trait_impute(cover, traits)
+  command = make_trait_impute(cover_data, traits)
 ),
 
 # bootstrapping for CWM

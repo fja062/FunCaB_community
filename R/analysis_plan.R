@@ -4,7 +4,7 @@ analysis_plan <- list(
     # calculate diversity metrics
     tar_target(
       name = diversity,
-      command = calc_diversity(cover)
+      command = calc_diversity(cover_data)
     )
 
 
