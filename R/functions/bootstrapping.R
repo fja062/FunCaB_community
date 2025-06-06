@@ -1,10 +1,10 @@
 ## Bootstrapping
 
 # trait imputation
-make_trait_impute <- function(cover, traits){
+make_trait_impute <- function(cover_data, traits){
 
   #prepare community data
-  comm <- cover |> 
+  comm <- cover_data |> 
     filter(year == 2019,
     !is.na(cover))
 

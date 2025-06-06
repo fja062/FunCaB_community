@@ -1,8 +1,8 @@
 ### community analysis functions
 
-calc_diversity <- function(cover){
+calc_diversity <- function(cover_data){
 
-  cover %>%
+  cover_data %>%
     group_by(year, siteID, blockID, plotID, removal, fg_removed, fg_remaining, functional_group, temperature_level, precipitation_level, precipitation, temperature) |> 
     summarise(richness = n(),
               diversity = diversity(cover),
@@ -12,9 +12,9 @@ calc_diversity <- function(cover){
 
 
 ### MAKE SP PCA
-make_sp_pca <- function(cover){
+make_sp_pca <- function(cover_data){
 
-  comm_wide <- cover |>
+  comm_wide <- cover_data |>
     filter(!is.na(cover)) |>
     select(-functional_group) |>
     mutate(cover = sqrt(cover)) |>
