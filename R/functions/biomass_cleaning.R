@@ -6,7 +6,6 @@ merge_community_biomass <- function(community, standing_biomass){
   ### Fauske has only blocks 2 and 3 and is missing 1
   ### Gudmedal has only blocks 1 and 3 and is missing, 2 and 4
   standing_biomass_merged <- community |>
-  #filter(treatment == "XC") |>
   select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
   tidylog::distinct() |>
   #remove duplicates
@@ -21,7 +20,7 @@ merge_community_biomass <- function(community, standing_biomass){
   separate_wider_delim(functional_group, delim = "_", names = c("trait", "functional_group")) |>
   ### THERE ARE DUPLICATES IN THE COMMUNITY DATA, CANNOT MAKE PIVOT WIDER ANYMORE
   # there are duplicates in: Gud1XC, Fau2XC, Gud3XC (remove for now, but this should be fixed!!!)
-  filter(!plotID %in% c("Gud1XC", "Fau2XC", "Gud3XC")) |> 
+  filter(!plotID %in% c("Gud1XC", "Fau2XC", "Gud3XC")) |>
   pivot_wider(names_from = trait, values_from = cover) |>
   select(-blockID) |>
   tidylog::left_join(
