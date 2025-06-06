@@ -33,11 +33,11 @@ transformation_plan <- list(
   # prep biomass
   tar_target(
     name = biomass,
-    command = removed_biomass_raw |> 
+    command = removed_biomass_raw |>
     mutate(plotID = if_else(
       treatment == "GF" & str_detect(plotID, "FG"),
         str_replace(plotID, "FG", "GF"),
-        plotID)) %>% 
+        plotID)) %>%
     # fix blockID
     funcabization(., convert_to = "Funder") %>%
     make_fancy_data(., gridded_climate, fix_treatment = TRUE)
@@ -68,13 +68,29 @@ transformation_plan <- list(
       rename(standing_biomass = biomass)
   ),
 
+# add this to community transformation plan
+#community |> select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |> filter(fg_removed == "C") |> distinct() |> arrange(plotID, year) |> group_by(plotID) |> mutate(moss_height2 = case_when((is.na(moss_height) & year %in% c(2016, 2017, 2018)) ~ (lag(moss_height) + lead(moss_height))/2, (is.na(moss_height) & year == 2015) ~ lead(moss_height), (is.na(moss_height) & year == 2019) ~ lag(moss_height), TRUE ~ moss_height)) |> view()
+
+# 1 impute moss heights from surrounding years
+# 2 use sum of covers when fg cover is missing
+
   # make community data
   tar_target(
     name = community,
     command = community_raw %>%
+      mutate(blockID = case_when(
+        plotID == "Fau1XC" ~ "Fau1",
+        plotID == "Fau4XC" ~ "Fau4",
+        plotID == "Fau3XC" ~ "Fau5",
+        plotID == "Gud1XC" ~ "Gud12",
+        plotID == "Gud4XC" ~ "Gud15",
+        TRUE ~ blockID
+      )) |>
+      filter(!(plotID == "Alr3C" & is.na(turfID))) %>% # keep only the TTC controls in Alrust
       funcabization(., convert_to = "Funder") %>%
       make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
+
 
   # prep cover
   tar_target(
@@ -162,44 +178,44 @@ tar_target(
 # join response and explanatory variables for analysis
   tar_target(
     name = analysis_data,
-    command = biomass_coefficients |> 
+    command = biomass_coefficients |>
       # filter for only 2019 data
       filter(year == 2019) |>
-      
+
       # join with removed biomass
       # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
       # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
-      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |> 
+      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |>
       # add missing blockID for control plots
       mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
-      
+
       # join with diversity
-      tidylog::left_join(diversity |> 
-        ungroup() |> 
-        filter(year == 2019) |> 
+      tidylog::left_join(diversity |>
+        ungroup() |>
+        filter(year == 2019) |>
         select(-removal, -functional_group, -c(temperature_level:temperature)),
           by = join_by(year, siteID, plotID, fg_removed, fg_remaining))
-      
+
   ),
 
   # join response and explanatory variables for trait analysis
   tar_target(
     name = analysis_traits,
-    command = biomass_coefficients |> 
+    command = biomass_coefficients |>
       # filter for only 2019 data
       filter(year == 2019) |>
-      
+
       # join with removed biomass
       # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
       # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
-      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |> 
+      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |>
       # add missing blockID for control plots
-      mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |> 
+      mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
 
       # join with traits
       # WHY DO 720 NOT JOIN???!!!
       tidylog::anti_join(trait_means)
-      
+
   )
 
 )
