@@ -233,7 +233,7 @@ tar_target(
         ungroup() |>
         filter(year == 2019) |>
         select(-removal, -functional_group, -c(temperature_level:temperature)),
-          by = join_by(year, siteID, plotID, fg_removed, fg_remaining))
+          by = join_by(year, siteID, plotID, blockID, fg_removed, fg_remaining))
 
   ),
 
@@ -253,7 +253,7 @@ tar_target(
 
       # join with traits
       # WHY DO 720 NOT JOIN???!!!
-      tidylog::anti_join(trait_means)
+      tidylog::left_join(trait_means)
 
   )
 
