@@ -69,66 +69,11 @@ transformation_plan <- list(
   ),
 
 
-  # make community data
+  # make community data, impute missing cover values, construct FG cover coefficients
   tar_target(
     name = community,
-    command = {
-      transition_community <- community_raw %>%
-      mutate(blockID = case_when(
-        plotID == "Fau1XC" ~ "Fau1",
-        plotID == "Fau4XC" ~ "Fau4",
-        plotID == "Fau3XC" ~ "Fau5",
-        plotID == "Gud1XC" ~ "Gud12",
-        plotID == "Gud4XC" ~ "Gud15",
-        TRUE ~ blockID
-      )) |>
-      # imputing 0s in moss height where moss cover is low
-      mutate(moss_height = case_when(
-        (is.na(moss_height) & total_bryophytes <= 5) ~ 0,
-        TRUE ~ moss_height
-      )) |>
-        # create sum of covers
-        group_by(year, plotID, functional_group) |>
-        mutate(sum_cover = sum(cover)) |>
-        # keep only the TTC controls in Alrust
-      filter(!(plotID == "Alr3C" & is.na(turfID))) %>%
-      funcabization(., convert_to = "Funder") %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE) %>%
-        select(-sumcover) |>
-        ungroup()
-
-      impute_ctrls <- transition_community |>
-        left_join(
-          transition_community |>
-            select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
-        filter(fg_removed == "C") |>
-        distinct() |>
-        group_by(plotID) |>
-        mutate(moss_height2 = case_when(
-          (is.na(moss_height)) ~ mean(moss_height, na.rm = TRUE),
-          TRUE ~ moss_height))
-        ) |>
-        mutate(moss_height = if_else((is.na(moss_height) & fg_removed == "C"), moss_height2, moss_height)) |>
-        select(-moss_height2) |>
-        ungroup()
-
-      impute_trts <- impute_ctrls |>
-        left_join(impute_ctrls |>
-        select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
-        tidylog::distinct() |>
-        #filter(fg_removed %in% c("C", "XC")) |>
-        group_by(siteID, year) |>
-        mutate(site_moss_height = mean(moss_height, na.rm = TRUE),
-               moss_height2 = if_else(is.na(moss_height), site_moss_height, moss_height))
-        ) |>
-        mutate(moss_height = if_else((is.na(moss_height)), moss_height2, moss_height),
-               imputed_height = if_else(moss_height == site_moss_height, TRUE, FALSE)) |>
-        select(-moss_height2, -site_moss_height) |>
-        ungroup()
-
-      # testing for outliers in imputed values
-      # community |> select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes, moss_height_imputed, site_moss_height) |> distinct() |> mutate(diff_height = moss_height_imputed - site_moss_height, is_imputed = if_else(moss_height_imputed == site_moss_height, TRUE, FALSE))|> filter(year == 2016) |> ggplot(aes(moss_height_imputed, fill = is_imputed)) + geom_histogram()
-      }
+    command = fg_cleaning(community_raw) |>
+      make_fg_cover_coefficients()
   ),
 
 
@@ -137,7 +82,7 @@ transformation_plan <- list(
     name = cover_data,
     command = community |>
       # remove extra plots in 2016
-      filter(fg_removed != "XC") |> 
+      filter(fg_removed != "XC") |>
       select(year:fg_removed, species, cover, functional_group, temperature_level:fg_remaining)
   ),
 
@@ -221,8 +166,8 @@ tar_target(
       # filter for only 2019 data
       filter(year == 2019) |>
       # rename to 2019 standing biomass
-      rename(standing_biomass_19 = standing_biomass_calculated) |> 
-      select(-year) |> 
+      rename(standing_biomass_19 = standing_biomass_calculated) |>
+      select(-year) |>
 
       # join with removed biomass
       # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
@@ -231,7 +176,7 @@ tar_target(
       # add missing blockID for control plots
       mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
       # rename to cumulative removed biomass
-      rename(cum_removed_biomass = removed_biomass) |> 
+      rename(cum_removed_biomass = removed_biomass) |>
 
       # join with diversity
       tidylog::left_join(diversity |>
