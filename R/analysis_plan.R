@@ -5,7 +5,7 @@ analysis_plan <- list(
     tar_target(
       name = diversity,
       command = calc_diversity(cover_data)
-    )
+    ),
 
 
   # make pca
@@ -17,16 +17,57 @@ analysis_plan <- list(
 
 
 #1. Effect of remaining/removed biomass on biomass of focal PFG
-
 #Single FG presence:
 #  g ~ b crb * f crb
 #  b ~ g crb * f crb
 #  f ~ b crb * g crb
 
+tar_target(
+      name = single_fg_model,
+      command = {
+
+        G_only <- analysis_data |> 
+          filter(fg_remaining == "G",
+                 functional_group == "graminoids") |>
+          select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |> 
+          pivot_wider(names_from = removed_fg, values_from = cum_removed_biomass, names_prefix = "crb_") %>%
+          make_fancy_data(., gridded_climate, fix_treatment = FALSE)
+
+
+        fit <- lmerTest::lmer(standing_biomass_19 ~ crb_B * crb_F + (1|siteID), data = G_only)
+        summary(fit)
+        
+
+        F_only <- analysis_data |> 
+          filter(fg_remaining == "F",
+                 functional_group == "forbs") |> 
+          select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |> 
+          pivot_wider(names_from = removed_fg, values_from = cum_removed_biomass, names_prefix = "crb_") %>%
+          make_fancy_data(., gridded_climate, fix_treatment = FALSE)
+
+        fit <- lmerTest::lmer(standing_biomass_19 ~ crb_B * crb_G + (1|siteID), data = F_only)
+        summary(fit)
+        
+
+        B_only <- analysis_data |> 
+          filter(fg_remaining == "B",
+                 functional_group == "bryophytes") |> 
+          select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |> 
+          pivot_wider(names_from = removed_fg, values_from = cum_removed_biomass, names_prefix = "crb_") %>%
+          make_fancy_data(., gridded_climate, fix_treatment = FALSE)
+
+        fit <- lmerTest::lmer(standing_biomass_19 ~ crb_F * crb_G + (1|siteID), data = B_only)
+        summary(fit)
+
+      }
+        
+      
+    ),
+
 
 
 #Multiple FG presence:
-#  gb ~ b sb * f crb
+#gb ~ b sb * f crb
 #gb ~ g sb * f crb
 #gf ~ f sb * b crb
 #gf ~ g sb * b crb
@@ -37,6 +78,43 @@ analysis_plan <- list(
 #fgb(c) ~ g sb * f sb
 #fgb(c) ~ b sb * g sb
 
+tar_target(
+      name = multiple_fg_model,
+      command = {
+
+        # two fg present
+        GB <- analysis_data |> 
+          filter(fg_remaining == "GB",
+                 functional_group != "forbs") |> 
+          select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, functional_group, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |> 
+          pivot_wider(names_from = functional_group, values_from = standing_biomass_19, names_prefix = "sb_") %>%
+          make_fancy_data(., gridded_climate, fix_treatment = FALSE)
+
+        #gb ~ b sb * f crb
+        fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * cum_removed_biomass + (1|siteID), data = GB)
+        summary(fit)
+
+        #gb ~ g sb * f crb
+        fit <- lmerTest::lmer(sb_bryophytes ~ sb_graminoids * cum_removed_biomass + (1|siteID), data = GB)
+
+
+
+        # three fg present
+        FGB <- analysis_data |> 
+          filter(fg_remaining == "FGB") |> 
+          select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, functional_group, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |> 
+          pivot_wider(names_from = functional_group, values_from = standing_biomass_19, names_prefix = "sb_") %>%
+          make_fancy_data(., gridded_climate, fix_treatment = FALSE)
+
+        #fgb(c) ~ b sb * f sb
+        fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * sb_forbs + (1|siteID), data = FGB)
+        summary(fit)
+
+
+
+
+      }
+)
 
 
 
