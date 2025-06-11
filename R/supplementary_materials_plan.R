@@ -1,0 +1,2 @@
+# testing for outliers in imputed values
+# community |> select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes, moss_height_imputed, site_moss_height) |> distinct() |> mutate(diff_height = moss_height_imputed - site_moss_height, is_imputed = if_else(moss_height_imputed == site_moss_height, TRUE, FALSE))|> filter(year == 2016) |> ggplot(aes(moss_height_imputed, fill = is_imputed)) + geom_histogram()
