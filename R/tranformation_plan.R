@@ -72,7 +72,7 @@ transformation_plan <- list(
   # make community data, impute missing cover values, construct FG cover coefficients
   tar_target(
     name = community,
-    command = fg_cleaning(community_raw) |>
+    command = fg_cleaning(community_raw, gridded_climate) %>%
       make_fg_cover_coefficients()
   ),
 
