@@ -100,15 +100,15 @@ tar_target(
 
 
         # three fg present
-        FGB <- analysis_data |> 
-          filter(fg_remaining == "FGB") |> 
-          select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, functional_group, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |> 
-          pivot_wider(names_from = functional_group, values_from = standing_biomass_19, names_prefix = "sb_") %>%
-          make_fancy_data(., gridded_climate, fix_treatment = FALSE)
+        # FGB <- analysis_data |> 
+        #   filter(fg_remaining == "FGB") |> 
+        #   select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, functional_group, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |> 
+        #   pivot_wider(names_from = functional_group, values_from = standing_biomass_19, names_prefix = "sb_") %>%
+        #   make_fancy_data(., gridded_climate, fix_treatment = FALSE)
 
-        #fgb(c) ~ b sb * f sb
-        fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * sb_forbs + (1|siteID), data = FGB)
-        summary(fit)
+        # #fgb(c) ~ b sb * f sb
+        # fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * sb_forbs + (1|siteID), data = FGB)
+        # summary(fit)
 
 
 
