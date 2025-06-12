@@ -1,5 +1,6 @@
 fg_cleaning <- function(community_raw, gridded_climate){
   transition_community <- community_raw %>%
+    # cleaning blockIDs
     mutate(blockID = case_when(
       plotID == "Fau1XC" ~ "Fau1",
       plotID == "Fau4XC" ~ "Fau4",
@@ -8,6 +9,27 @@ fg_cleaning <- function(community_raw, gridded_climate){
       plotID == "Gud4XC" ~ "Gud15",
       TRUE ~ blockID
     )) |>
+    
+    # remove single occurence species
+    filter(! species %in% c("Dan.dec", "Ver.ver")) |> 
+    
+    # fix missing total_graminoids and total_forbs
+    mutate(total_graminoids = case_when(
+      is.na(total_graminoids) & plotID == "Fau1C" & species == "Hol.lan" ~ 70,
+      is.na(total_graminoids) & plotID == "Fau2C" & species == "Hol.lan" ~ 60,
+      is.na(total_graminoids) & plotID == "Ram5C" & species == "Fes.viv" ~ 50,
+      is.na(total_graminoids) & plotID == "Vik5C" & species == "Hol.lan" ~ 45,
+      TRUE ~ total_graminoids
+    ),
+    total_forbs = case_when(
+      is.na(total_forbs) & plotID == "Fau1C" & species == "Hol.lan" ~ 70,
+      is.na(total_forbs) & plotID == "Fau2C" & species == "Hol.lan" ~ 25,
+      is.na(total_forbs) & plotID == "Ram5C" & species == "Fes.viv" ~ 40,
+      is.na(total_forbs) & plotID == "Vik5C" & species == "Hol.lan" ~ 60,
+      TRUE ~ total_forbs
+    )
+  ) |> 
+    
     # imputing 0s in moss height where moss cover is low
     mutate(moss_height = case_when(
       (is.na(moss_height) & total_bryophytes <= 5) ~ 0,
@@ -18,7 +40,11 @@ fg_cleaning <- function(community_raw, gridded_climate){
     mutate(sum_cover = sum(cover)) |>
     # keep only the TTC controls in Alrust
     filter(!(plotID == "Alr3C" & is.na(turfID))) %>%
+    
+    # fix plotIDs
     funcabization(., convert_to = "Funder") %>%
+    
+    # make data fancy
     make_fancy_data(., gridded_climate, fix_treatment = TRUE) %>%
     select(-sumcover) |>
     ungroup()
