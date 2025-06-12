@@ -1,4 +1,4 @@
-fg_cleaning <- function(community_raw){
+fg_cleaning <- function(community_raw, gridded_climate){
   transition_community <- community_raw %>%
     mutate(blockID = case_when(
       plotID == "Fau1XC" ~ "Fau1",
