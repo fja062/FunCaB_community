@@ -51,6 +51,8 @@ transformation_plan <- list(
       filter(fg_removed != "XC") |>
       # remove 2020 data |>
       filter(year < 2020) |>
+      # remove mistakenly cut forb biomass from Ovs1B in 2019
+      filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
       # sum biomass across years
       group_by(siteID, temperature_level, precipitation_level, blockID, plotID, fg_removed, removed_fg) |>
       summarise(removed_biomass = sum(biomass)) |>
