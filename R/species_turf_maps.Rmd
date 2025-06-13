@@ -1,0 +1,33 @@
+---
+title: "Check FunCaB species"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("tidyverse")
+```
+
+## Check turfs
+
+```{r many_plots, eval = TRUE, fig.height=11, fig.width = 5, warning=FALSE}
+
+x <- community |>
+  # sort
+  arrange(siteID, plotID) |>
+  group_by(siteID, plotID) |>
+  nest() %>% 
+  {map2(
+    .x = .$data, 
+    .y = glue::glue("Site {.$siteID}: plot {.$plotID}"),
+    .f = ~make_turf_plot_no_subturfs(
+      data = .x, 
+      year = year, 
+      species = species, 
+      cover = cover, 
+      title = glue::glue(.y))
+  )} %>% 
+  walk(print)
+
+
+```
