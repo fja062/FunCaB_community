@@ -7,13 +7,16 @@ merge_community_biomass <- function(community, standing_biomass){
   ### Gudmedal has only blocks 1 and 3 and is missing, 2 and 4
   standing_biomass_merged <- community |>
   select(year:fg_removed, fg_remaining, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
+
   # remove species level data and select for plot level
   tidylog::distinct() |>
+
   #remove duplicates
   dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, fg_removed)) |>
   tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
   tidylog::filter(!c(plotID == "Alr3C" & year == 2016 & vegetation_height > 80)) |>
   tidylog::filter(!c(plotID == "Alr3C" & year == 2017 & vegetation_height > 83)) |>
+
   # remove last duplicate
   mutate(height_forbs = vegetation_height) |>
   rename(height_graminoids = vegetation_height) |>
@@ -87,6 +90,7 @@ merge_community_biomass <- function(community, standing_biomass){
 #ggsave(filename = "~/OneDrive - University of Bergen/research/FunCaB/paper 2/figuressupFig_1#.jpg", dpi = 300, width = 9, height = 6)
 
 make_biomass_coefficients <- function(standing_biomass_merged){
+
 # linear model by functional group
 lm_forb <- summary(lm(standing_biomass ~ 0 + total, data = standing_biomass_merged |> filter(functional_group == "forbs")))$coefficients %>% as_tibble()
 lm_bryophyte <- summary(lm(standing_biomass ~ 0 + cover_height, data = standing_biomass_merged |> filter(functional_group == "bryophytes")))$coefficients %>% as_tibble()
