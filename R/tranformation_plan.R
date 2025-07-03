@@ -164,12 +164,12 @@ tar_target(
 # join response and explanatory variables for analysis
   tar_target(
     name = analysis_data,
-    command = biomass_coefficients |>
+    command = biomass_coefficients |> 
       # filter for only 2019 data
-      filter(year == 2019) |>
+      #filter(year == 2019) |>
       # rename to 2019 standing biomass
-      rename(standing_biomass_19 = standing_biomass_calculated) |>
-      select(-year) |>
+      #rename(standing_biomass = standing_biomass_calculated) |>
+      #select(-year) |>
 
       # join with removed biomass
       # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
@@ -178,14 +178,14 @@ tar_target(
       # add missing blockID for control plots
       mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
       # rename to cumulative removed biomass
-      rename(cum_removed_biomass = removed_biomass) |>
+      rename(cum_removed_biomass = removed_biomass) #|>
 
       # join with diversity
-      tidylog::left_join(diversity |>
-        ungroup() |>
-        filter(year == 2019) |>
-        select(-year, -removal, -c(temperature_level:temperature)),
-          by = join_by(siteID, plotID, blockID, fg_removed, fg_remaining, functional_group))
+      # tidylog::left_join(diversity |>
+      #   ungroup() |>
+      #   filter(year == 2019) |>
+      #   select(-year, -removal, -c(temperature_level:temperature)),
+      #     by = join_by(siteID, plotID, blockID, fg_removed, fg_remaining, functional_group))
 
   ),
 
