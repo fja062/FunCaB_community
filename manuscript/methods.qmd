@@ -3,18 +3,13 @@
 ------------------------------------------------------------------------
 
 ```{r}
-#| label: set-up-results
+#| label: set-up-methods
 #| echo: false
 library(targets)
 library(tarchetypes)
 
 ```
 
-## Results
+## Methods
 
-Here we can add figures, tables and results...
-
-
-```{r}
-
-```
+Here we can write the methods

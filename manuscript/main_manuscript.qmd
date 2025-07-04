@@ -1,0 +1,71 @@
+---
+title: "Species interactions shift plant functional traits"
+author: 
+  - name: Aud H. Halbritter
+    orcid: 0000-0003-2597-6328
+    email: aud.halbritter@uib.no
+    affiliations:
+      - name: Department of Biological Sciences, University of Bergen 
+        city: Bergen
+        address: Postbox 7803
+        country: Norway
+        postal-code: N-5020
+  - name: Francesca Jaroszynsca
+    orcid: ...
+    affiliations:
+      - name: Department of Biological Sciences, University of Bergen
+        city: Bergen
+        country: Norway
+  - name: Deborah Goldberg
+    orcid: 0000-0002-7950-0432
+    affiliations:
+      - name: Department of Ecology and Evolutionary Biology, University of Michigan
+        city: Ann Arbor, MI
+        country: USA
+  - name: Kari Klanderud
+    affiliations:
+      - name: Faculty of Environmental Sciences and Natural Resource, Norwegian University of Life Sciences
+        city: As
+        country: Norway
+  - name: Richard J. Telford
+    orcid: 0000-0003-4651-4798
+    affiliations:
+      - name: Department of Biological Sciences, University of Bergen
+        city: Bergen
+        country: Norway
+  - name: Vigdis Vandvik
+    orcid: 0000-0003-4651-4798
+    affiliations:
+      - name: Department of Biological Sciences, University of Bergen
+        city: Bergen
+        country: Norway
+        
+format:
+  html: 
+    self-contained: false
+editor: visual
+abstract: >
+  TBA
+  
+
+keywords:
+  - TBA
+
+bibliography: bibliography.bib
+
+csl: nature.csl
+link-citations: true
+
+execute:
+  echo: false
+  error: true
+  out-width: '100%'
+---
+
+{{< include introduction.qmd >}}
+
+{{< include methods.qmd >}}
+
+{{< include results.qmd >}}
+
+{{< include discussion.qmd >}}
