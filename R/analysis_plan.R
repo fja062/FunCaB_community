@@ -47,7 +47,10 @@ analysis_plan <- list(
 
       # fit the model:
       # sb G ~ crb_B + crb_F + precip + crb_B:precip + crb_F:precip + year + (1 | siteID)
-      result <- fit_scaled_mixed_model(data = G_only)
+      result <- fit_scaled_mixed_model(
+        data = G_only,
+        fixed_formula = standing_biomass_calculated ~ crb_B + crb_F + precipitation + year
+      )
       result$model
       result$scaled_data
       result$original_data
