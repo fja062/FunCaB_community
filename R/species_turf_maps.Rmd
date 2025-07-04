@@ -12,10 +12,10 @@ library("tidyverse")
 
 ```{r many_plots, eval = TRUE, fig.height=11, fig.width = 5, warning=FALSE}
 
-x <- community |>
+x <- dat |>
   # sort
-  arrange(siteID, plotID) |>
-  group_by(siteID, plotID) |>
+  arrange(siteID, turfID) |>
+  group_by(siteID, turfID) |>
   nest() %>% 
   {map2(
     .x = .$data, 
