@@ -112,7 +112,19 @@ tar_target(
   # make biomass coefficients
   tar_target(
     name = biomass_coefficients,
-    command = make_biomass_coefficients(remaining_biomass_merged)
+    command = {
+      # get biomass coefficients
+      base <- make_biomass_coefficients(remaining_biomass_merged)
+      # get biomass in 2015
+      biomass_2015 <- base |>
+        filter(year == 2015) |>
+        select(plotID, biomass_2015 = standing_biomass_calculated)
+      # join 2015 biomass back to base
+      # issue: 2018 Veskre Ves4C  post    C          FGB should not be there?!?
+      base |> 
+        tidylog::left_join(biomass_2015, by = "plotID") |>
+        mutate(delta_biomass = standing_biomass_calculated - biomass_2015)
+    }
   ),
 
 
