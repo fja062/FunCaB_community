@@ -1,3 +1,5 @@
+
+
 # Function: fit_scaled_mixed_model
 # 
 # This function provides a complete workflow for fitting mixed effects models with scaled predictors
@@ -26,9 +28,16 @@
 #   )
 
 fit_scaled_mixed_model <- function(data, fixed_formula, model_formula, random_effects = "(1 | siteID)", grouping_var = "siteID") {
-  # 1. Create and prep the recipe for scaling predictors (include grouping var but do not scale it)
+  # Handle multiple grouping variables
+  if (length(grouping_var) > 1) {
+    grouping_vars_str <- paste(grouping_var, collapse = " + ")
+  } else {
+    grouping_vars_str <- grouping_var
+  }
+  
+  # 1. Create and prep the recipe for scaling predictors (include grouping vars but do not scale them)
   rec <- recipe(
-    update(fixed_formula, paste(". ~ . +", grouping_var)),
+    update(fixed_formula, paste(". ~ . +", grouping_vars_str)),
     data = data
   ) %>%
     step_center(all_predictors(), -all_of(grouping_var)) %>%
@@ -87,15 +96,46 @@ fit_scaled_mixed_model <- function(data, fixed_formula, model_formula, random_ef
 #   )
 
 prepare_model_data <- function(data, fg_present, fg_name, exclude_year = "2015") {
-  data |>
-    filter(
-      fg_remaining == fg_present,
-      functional_group == fg_name,
-      year != exclude_year
-    ) |>
+  # Check for required column
+  if (!"functional_group" %in% names(data)) {
+    stop("The input data must have a column named 'functional_group'. Columns present: ", paste(names(data), collapse=", "))
+  }
+  # Determine which functional groups were removed based on what remains
+  # When fg_remaining == "G", only "F" and "B" were removed (not "G")
+  # When fg_remaining == "F", only "G" and "B" were removed (not "F")
+  # When fg_remaining == "B", only "G" and "F" were removed (not "B")
+  if (fg_present == "G") {
+    expected_removed_fg <- c("F", "B")
+  } else if (fg_present == "F") {
+    expected_removed_fg <- c("G", "B")
+  } else if (fg_present == "B") {
+    expected_removed_fg <- c("G", "F")
+  } else {
+    stop("fg_present must be one of 'G', 'F', or 'B'")
+  }
+  
+  expected_fg_cols <- paste0("crb_", expected_removed_fg)
+  
+  # Filter the data first to avoid non-standard evaluation issues
+  filtered_data <- data[data$fg_remaining == fg_present & 
+                       data$functional_group == fg_name & 
+                       data$year != exclude_year, ]
+  
+  result <- filtered_data |>
     pivot_wider(
       names_from = removed_fg,
       values_from = cum_removed_biomass,
       names_prefix = "crb_"
     )
+  
+  # Ensure all expected crb columns exist, fill with 0 if missing
+  # (0 means no biomass was removed for that functional group)
+  missing_cols <- setdiff(expected_fg_cols, names(result))
+  if (length(missing_cols) > 0) {
+    for (col in missing_cols) {
+      result[[col]] <- 0
+    }
+  }
+  
+  result
 }
