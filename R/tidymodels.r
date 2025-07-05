@@ -6,7 +6,8 @@
 #
 # Parameters:
 #   data: Data frame containing the response and predictor variables
-#   fixed_formula: Formula for fixed effects (e.g., y ~ x1 + x2)
+#   fixed_formula: Formula for fixed effects only (e.g., y ~ x1 + x2) - used for scaling
+#   model_formula: Full model formula including interactions (e.g., y ~ x1 + x2 + x1:x2) - used for fitting
 #   random_effects: String specifying random effects (default: "(1 | siteID)")
 #   grouping_var: Name of the grouping variable for random effects (default: "siteID")
 #
@@ -20,10 +21,11 @@
 #   results <- fit_scaled_mixed_model(
 #     data = my_data,
 #     fixed_formula = response ~ predictor1 + predictor2,
+#     model_formula = response ~ predictor1 + predictor2 + predictor1:predictor2,
 #     random_effects = "(1 | siteID)"
 #   )
 
-fit_scaled_mixed_model <- function(data, fixed_formula, random_effects = "(1 | siteID)", grouping_var = "siteID") {
+fit_scaled_mixed_model <- function(data, fixed_formula, model_formula, random_effects = "(1 | siteID)", grouping_var = "siteID") {
   # 1. Create and prep the recipe for scaling predictors (include grouping var but do not scale it)
   rec <- recipe(
     update(fixed_formula, paste(". ~ . +", grouping_var)),
@@ -35,11 +37,11 @@ fit_scaled_mixed_model <- function(data, fixed_formula, random_effects = "(1 | s
   # 2. Bake the scaled data
   scaled_data <- bake(rec_prep, new_data = NULL)
   # 3. Fit the mixed effects model using the scaled data
-  model_formula <- as.formula(
-    paste(deparse(fixed_formula), "+", random_effects)
+  full_model_formula <- as.formula(
+    paste(deparse(model_formula), "+", random_effects)
   )
   fit <- lmer(
-    formula = model_formula,
+    formula = full_model_formula,
     data = scaled_data
   )
   # 4. Make predictions

@@ -38,51 +38,52 @@ analysis_plan <- list(
       # sb G ~ crb_B + crb_F + precip + crb_B:precip + crb_F:precip + year + (1 | siteID)
       result <- fit_scaled_mixed_model(
         data = G_only,
-        fixed_formula = standing_biomass_calculated ~ crb_B + crb_F + precipitation + year
+        fixed_formula = delta_biomass ~ crb_B + crb_F + precipitation + year,
+        model_formula = delta_biomass ~ crb_B + crb_F + precipitation + crb_B:precipitation + crb_F:precipitation + year
       )
-      result$model
-      result$scaled_data
-      result$original_data
+      # result$model
+      # result$scaled_data
+      # result$original_data
 
-      plot_model(result$model)
-      plot_model(result$model, type = "pred", terms = c("precipitation", "crb_F"))
+      # plot_model(result$model)
+      # plot_model(result$model, type = "pred", terms = c("precipitation", "crb_F"))
 
-      F_only <- analysis_data |>
-        filter(
-          fg_remaining == "F",
-          functional_group == "forbs",
-          year != "2015"
-        ) |>
-        select(year, siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, standing_biomass_calculated, cum_removed_biomass, temperature_level, precipitation_level) |>
-        pivot_wider(names_from = removed_fg, values_from = cum_removed_biomass, names_prefix = "crb_") %>%
-        make_fancy_data(., gridded_climate, fix_treatment = FALSE) |>
-        mutate(
-          year = year - 2000,
-          precipitation = precipitation / 1000
-        )
+      # F_only <- analysis_data |>
+      #   filter(
+      #     fg_remaining == "F",
+      #     functional_group == "forbs",
+      #     year != "2015"
+      #   ) |>
+      #   select(year, siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, standing_biomass_calculated, cum_removed_biomass, temperature_level, precipitation_level) |>
+      #   pivot_wider(names_from = removed_fg, values_from = cum_removed_biomass, names_prefix = "crb_") %>%
+      #   make_fancy_data(., gridded_climate, fix_treatment = FALSE) |>
+      #   mutate(
+      #     year = year - 2000,
+      #     precipitation = precipitation / 1000
+      #   )
 
-      scale(F_only$crb_G)
+      # scale(F_only$crb_G)
 
-      fit <- lmerTest::lmer(standing_biomass_calculated ~ crb_B * crb_G * precipitation + year + (1 | siteID), data = F_only)
-      summary(fit)
+      # fit <- lmerTest::lmer(standing_biomass_calculated ~ crb_B * crb_G * precipitation + year + (1 | siteID), data = F_only)
+      # summary(fit)
 
 
-      B_only <- analysis_data |>
-        filter(
-          fg_remaining == "B",
-          functional_group == "bryophytes",
-          year != "2015"
-        ) |>
-        select(year, siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, standing_biomass_calculated, cum_removed_biomass, temperature_level, precipitation_level) |>
-        pivot_wider(names_from = removed_fg, values_from = cum_removed_biomass, names_prefix = "crb_") %>%
-        make_fancy_data(., gridded_climate, fix_treatment = FALSE) |>
-        mutate(
-          year = year - 2000,
-          precipitation = precipitation / 1000
-        )
+      # B_only <- analysis_data |>
+      #   filter(
+      #     fg_remaining == "B",
+      #     functional_group == "bryophytes",
+      #     year != "2015"
+      #   ) |>
+      #   select(year, siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, standing_biomass_calculated, cum_removed_biomass, temperature_level, precipitation_level) |>
+      #   pivot_wider(names_from = removed_fg, values_from = cum_removed_biomass, names_prefix = "crb_") %>%
+      #   make_fancy_data(., gridded_climate, fix_treatment = FALSE) |>
+      #   mutate(
+      #     year = year - 2000,
+      #     precipitation = precipitation / 1000
+      #   )
 
-      fit <- lmerTest::lmer(standing_biomass_calculated ~ crb_G + crb_F + precipitation + year + (1 | siteID), data = B_only)
-      summary(fit)
+      # fit <- lmerTest::lmer(standing_biomass_calculated ~ crb_G + crb_F + precipitation + year + (1 | siteID), data = B_only)
+      # summary(fit)
     }
   ),
 
@@ -111,19 +112,14 @@ analysis_plan <- list(
           year != "2015"
         ) |>
         select(year, siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, functional_group, standing_biomass_calculated, cum_removed_biomass, temperature_level, precipitation_level) |>
-        pivot_wider(names_from = functional_group, values_from = standing_biomass_calculated, names_prefix = "sb_") %>%
-        make_fancy_data(., gridded_climate, fix_treatment = FALSE) |>
-        mutate(
-          year = year - 2000,
-          precipitation = precipitation / 1000
-        )
+        pivot_wider(names_from = functional_group, values_from = standing_biomass_calculated, names_prefix = "sb_")
 
       # gb ~ b sb * f crb
-      fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * cum_removed_biomass * precipitation + year + (1 | siteID), data = GB)
-      summary(fit)
+      # fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * cum_removed_biomass * precipitation + year + (1 | siteID), data = GB)
+      # summary(fit)
 
-      # gb ~ g sb * f crb
-      fit <- lmerTest::lmer(sb_bryophytes ~ sb_graminoids * cum_removed_biomass + (1 | siteID), data = GB)
+      # # gb ~ g sb * f crb
+      # fit <- lmerTest::lmer(sb_bryophytes ~ sb_graminoids * cum_removed_biomass + (1 | siteID), data = GB)
 
 
 
