@@ -22,28 +22,17 @@ analysis_plan <- list(
   #  b ~ g crb * f crb
   #  f ~ b crb * g crb
 
-  # calculate delta sb (all years - 2015)
   # forb cover in 2015 and crb forbs: check relationship
   # stepwise model removal
 
   tar_target(
     name = single_fg_model,
     command = {
-      G_only <- analysis_data |>
-        filter(
-          fg_remaining == "G",
-          functional_group == "graminoids",
-          year != "2015"
-        ) |>
-        select(year, siteID, blockID, plotID, fg_removed, fg_remaining,
-        removed_fg, standing_biomass_calculated, standing_biomass_calculated,
-        cum_removed_biomass, temperature_level, precipitation_level,
-        precipitation, temperature) |>
-        pivot_wider(
-          names_from = removed_fg,
-          values_from = cum_removed_biomass,
-          names_prefix = "crb_"
-          )
+      G_only <- prepare_model_data(
+        data = analysis_data,
+        fg_present = "G",
+        fg_name = "graminoids"
+      )
 
       # fit the model:
       # sb G ~ crb_B + crb_F + precip + crb_B:precip + crb_F:precip + year + (1 | siteID)

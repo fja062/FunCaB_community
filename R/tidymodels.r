@@ -58,3 +58,42 @@ fit_scaled_mixed_model <- function(data, fixed_formula, random_effects = "(1 | s
     original_data = original_data
   )
 }
+
+# Function: prepare_model_data
+#
+# This function prepares data for mixed effects modeling by filtering,
+# and creating a wide table format with functional group removal biomass as separate columns.
+#
+# Parameters:
+#   data: Data frame containing the analysis data (e.g., analysis_data)
+#   fg_present: Character string specifying the functional group to filter for (e.g., "G", "F", "B")
+#   fg_name: Character string specifying the functional group name for filtering (e.g., "graminoids", "forbs", "bryophytes")
+#   exclude_year: Character or numeric specifying which year to exclude (default: "2015")
+#
+# Returns:
+#   A wide-format data frame with:
+#     - Response variable: standing_biomass_calculated
+#     - Predictor variables: crb_B, crb_F, crb_G (cumulative removed biomass by functional group)
+#     - Environmental variables: precipitation, temperature
+#     - Grouping variables: year, siteID, blockID, plotID, etc.
+#
+# Example usage:
+#   G_only <- prepare_model_data(
+#     data = analysis_data,
+#     fg_present = "G",
+#     fg_name = "graminoids"
+#   )
+
+prepare_model_data <- function(data, fg_present, fg_name, exclude_year = "2015") {
+  data |>
+    filter(
+      fg_remaining == fg_present,
+      functional_group == fg_name,
+      year != exclude_year
+    ) |>
+    pivot_wider(
+      names_from = removed_fg,
+      values_from = cum_removed_biomass,
+      names_prefix = "crb_"
+    )
+}
