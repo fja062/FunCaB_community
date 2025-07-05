@@ -1,11 +1,28 @@
-# Example: Scaling predictors with recipes for mixed effects modeling
-# Load required libraries
-library(tidymodels)
-library(lmerTest)
-library(dplyr)
-library(sjPlot)
+# Function: fit_scaled_mixed_model
+# 
+# This function provides a complete workflow for fitting mixed effects models with scaled predictors
+# using the tidymodels/recipes framework. It handles preprocessing, model fitting, prediction,
+# and backtransformation of predictors to their original scale.
+#
+# Parameters:
+#   data: Data frame containing the response and predictor variables
+#   fixed_formula: Formula for fixed effects (e.g., y ~ x1 + x2)
+#   random_effects: String specifying random effects (default: "(1 | siteID)")
+#   grouping_var: Name of the grouping variable for random effects (default: "siteID")
+#
+# Returns:
+#   A list containing:
+#     - model: The fitted lmer model object
+#     - scaled_data: Data frame with scaled predictors and predictions
+#     - original_data: Data frame with backtransformed predictors and predictions
+#
+# Example usage:
+#   results <- fit_scaled_mixed_model(
+#     data = my_data,
+#     fixed_formula = response ~ predictor1 + predictor2,
+#     random_effects = "(1 | siteID)"
+#   )
 
-# Function to scale predictors, fit mixed effects model, predict, and backtransform
 fit_scaled_mixed_model <- function(data, fixed_formula, random_effects = "(1 | siteID)", grouping_var = "siteID") {
   # 1. Create and prep the recipe for scaling predictors (include grouping var but do not scale it)
   rec <- recipe(
@@ -41,12 +58,3 @@ fit_scaled_mixed_model <- function(data, fixed_formula, random_effects = "(1 | s
     original_data = original_data
   )
 }
-
-# Example usage:
-# results <- fit_scaled_mixed_model(
-#   G_only,
-#   standing_biomass_calculated ~ crb_B + crb_F + precipitation + year
-# )
-# results$model         # the fitted model
-# results$scaled_data   # the scaled data with predictions
-# results$original_data # the backtransformed predictors with predictions
