@@ -38,7 +38,7 @@ fit_scaled_mixed_model <- function(data, fixed_formula, model_formula, random_ef
   scaled_data <- bake(rec_prep, new_data = NULL)
   # 3. Fit the mixed effects model using the scaled data
   full_model_formula <- as.formula(
-    paste(deparse(model_formula), "+", random_effects)
+    paste(paste(deparse(model_formula), collapse = " "), "+", random_effects)
   )
   fit <- lmer(
     formula = full_model_formula,
