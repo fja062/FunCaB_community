@@ -109,6 +109,17 @@ tar_target(
     command = merge_community_biomass(community, standing_biomass)
   ),
 
+  # combine fg_cover with removed_biomass
+  tar_target(
+    name = fg_cover_biomass,
+    command = fg_cover |>
+      # join with removed biomass by common identifiers
+      tidylog::left_join(removed_biomass, 
+        by = join_by(siteID, blockID, plotID, fg_removed)) |>
+      # remove controls with missing biomass data
+      filter(!is.na(removed_biomass))
+  ),
+
   # make biomass coefficients
   tar_target(
     name = biomass_coefficients,
@@ -179,16 +190,12 @@ tar_target(
 
       # join with removed biomass
       # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
-      # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
       tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |>
       # add missing blockID for control plots
       mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
       # rename to cumulative removed biomass
       rename(cum_removed_biomass = removed_biomass) %>%
       make_fancy_data(., gridded_climate, fix_treatment = FALSE)
-      # # scale variables
-      # mutate(year = year - 2000,
-      #       precipitation = precipitation / 1000)
 
       # join with diversity
       # tidylog::left_join(diversity |>
