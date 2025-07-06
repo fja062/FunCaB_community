@@ -34,13 +34,15 @@ transformation_plan <- list(
   tar_target(
     name = biomass,
     command = removed_biomass_raw |>
-    mutate(plotID = if_else(
-      treatment == "GF" & str_detect(plotID, "FG"),
-        str_replace(plotID, "FG", "GF"),
-        plotID)) %>%
-    # fix blockID
-    funcabization(., convert_to = "Funder") %>%
-    make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      # Clean 2018 Ovstedalen duplicates
+      clean_ovstedalen_2018_duplicates() |>
+      mutate(plotID = if_else(
+        treatment == "GF" & str_detect(plotID, "FG"),
+          str_replace(plotID, "FG", "GF"),
+          plotID)) %>%
+      # fix blockID
+      funcabization(., convert_to = "Funder") %>%
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
   ),
 
   # sum biomass between 2015 and 2019 (without XC)

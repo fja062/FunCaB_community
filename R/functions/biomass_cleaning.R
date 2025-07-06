@@ -107,3 +107,21 @@ biomass_coefficients <- standing_biomass_merged |>
 )
 }
 
+# Clean 2018 Ovstedalen duplicates
+# Remove duplicate entries from Ovstedalen 2018 while preserving legitimate duplicates from 2016-2017
+clean_ovstedalen_2018_duplicates <- function(data) {
+  # Remove duplicates from 2018 Ovstedalen
+  # Keep only the first occurrence of each plot-functional group combination
+  cleaned_data <- data |>
+    filter(!(siteID == "Ovstedalen" & year == 2018)) |>
+    bind_rows(
+      data |>
+        filter(siteID == "Ovstedalen", year == 2018) |>
+        group_by(plotID, removed_fg) |>
+        slice(1) |>
+        ungroup()
+    )
+  
+  return(cleaned_data)
+}
+
