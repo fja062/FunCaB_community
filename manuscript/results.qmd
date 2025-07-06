@@ -1,6 +1,6 @@
-------------------------------------------------------------------------
-
-------------------------------------------------------------------------
+---
+editor: visual
+---
 
 ```{r}
 #| label: set-up-results
@@ -14,7 +14,16 @@ library(tarchetypes)
 
 Here we can add figures, tables and results...
 
+### Functional Group Cover vs Removed Biomass
 
 ```{r}
+#| label: fig-fg-cover-biomass
+#| fig-cap: "Relationship between functional group cover and removed biomass. Left panel shows graminoid cover vs removed biomass for plots where graminoids were removed. Right panel shows forb cover vs removed biomass for plots where forbs were removed. Regression lines with 95% confidence intervals are shown."
+#| echo: false
 
+# Load the figure from targets
+tar_load(fg_cover_biomass_panels)
+
+# Display the figure
+fg_cover_biomass_panels
 ```
