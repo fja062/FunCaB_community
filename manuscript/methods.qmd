@@ -12,4 +12,32 @@ library(tarchetypes)
 
 ## Methods
 
-Here we can write the methods
+### Study Sites
+
+The experiment was conducted across the Vestland Climate Grid (VCG) in Western Norway, spanning boreal and alpine regions. The VCG encompasses 12 sites distributed along environmental gradients, with growing season temperatures ranging from 6.5°C to 10.5°C and mean annual precipitation varying from 600 mm to 2600 mm. Sites were selected to represent the full range of climatic conditions found in the region, from lowland boreal forests to high alpine tundra.
+
+Each site was chosen to represent a distinct climatic zone within the gradient, with sites positioned at different elevations and distances from the coast. The sites vary in vegetation composition, from species-rich alpine grasslands to more species-poor boreal communities. All sites are characterized by semi-natural grasslands that have been maintained through traditional land use practices, primarily grazing and hay cutting.
+
+### Experimental Design
+
+The experiment employed a fully factorial design to assess the effects of plant functional group removals on community composition and ecosystem processes. Three plant functional groups were targeted for removal: graminoids (grasses and sedges), forbs (herbaceous dicots), and bryophytes (mosses and liverworts). The factorial design included all possible combinations of functional group removals, resulting in eight treatment combinations: control (no removals), three single functional group removals, three pairwise removals, and complete removal of all three functional groups.
+
+At each of the 12 sites, the experiment was established in a randomized block design. Each site contained four blocks, with eight plots per block, totaling 32 plots per site and 384 plots across all sites. Plots measured 2m × 2m and were positioned within each block to minimize environmental heterogeneity. Within each block, the eight treatment combinations were randomly assigned to plots.
+
+Treatment application began in [YEAR] and was maintained annually throughout the experimental period. Functional group removals were conducted by carefully hand-pulling or cutting all individuals of the target functional group, taking care to minimize disturbance to the remaining vegetation and soil. Removals were performed at the beginning of each growing season and repeated as necessary throughout the season to prevent regrowth. The experimental design allows for the assessment of both individual functional group effects and their interactions on community composition and ecosystem processes.
+
+### Data Collection
+
+#### Biomass Data
+
+Biomass data were collected annually from all experimental plots. Functional group biomass was measured by harvesting all aboveground biomass within each plot, separating by functional group (graminoids, forbs, bryophytes), and weighing after drying to constant mass at 60°C. In addition to functional group-level measurements, individual species biomass was recorded for 360 species-level records, providing detailed information on species-specific responses to the removal treatments.
+
+#### Plant Community Data
+
+Plant community composition was assessed through systematic vegetation surveys conducted across all experimental plots. The dataset includes 17,181 plant records covering 206 taxa, with data collected on species presence, abundance, and cover. Community surveys were conducted using standardized protocols to ensure consistency across sites and years.
+
+The plant community data capture both the immediate effects of functional group removals and the longer-term community responses, including potential compensatory responses by remaining functional groups and recruitment of new species.
+
+### Analysis
+
+*[Analysis section to be developed]*
