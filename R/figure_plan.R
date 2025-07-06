@@ -17,10 +17,18 @@ figure_plan <- list(
         # Only keep rows where forbs were actually removed (removed_fg == "F")
         filter(removed_fg == "F")
       
+      # Calculate R² for graminoid plot
+      graminoid_model <- lm(removed_biomass ~ total_graminoids, data = graminoid_removal_data)
+      graminoid_r2 <- round(summary(graminoid_model)$r.squared, 3)
+      
       # Create graminoid plot
       p1 <- ggplot(graminoid_removal_data, aes(x = total_graminoids, y = removed_biomass)) +
         geom_point(alpha = 0.7, size = 2, color = "blue") +
         geom_smooth(method = "lm", se = TRUE, color = "darkblue") +
+        annotate("text", x = Inf, y = Inf, 
+                label = paste("R² =", graminoid_r2), 
+                hjust = 1.1, vjust = 1.5, 
+                size = 4, fontface = "bold", color = "darkblue") +
         labs(
           title = "Graminoid Cover vs Removed Biomass",
           subtitle = "Plots where graminoids were removed",
@@ -35,10 +43,18 @@ figure_plan <- list(
           axis.text = element_text(size = 9)
         )
       
+      # Calculate R² for forb plot
+      forb_model <- lm(removed_biomass ~ total_forbs, data = forb_removal_data)
+      forb_r2 <- round(summary(forb_model)$r.squared, 3)
+      
       # Create forb plot
       p2 <- ggplot(forb_removal_data, aes(x = total_forbs, y = removed_biomass)) +
         geom_point(alpha = 0.7, size = 2, color = "red") +
         geom_smooth(method = "lm", se = TRUE, color = "darkred") +
+        annotate("text", x = Inf, y = Inf, 
+                label = paste("R² =", forb_r2), 
+                hjust = 1.1, vjust = 1.5, 
+                size = 4, fontface = "bold", color = "darkred") +
         labs(
           title = "Forb Cover vs Removed Biomass",
           subtitle = "Plots where forbs were removed",
