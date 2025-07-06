@@ -22,7 +22,6 @@ analysis_plan <- list(
   #  b ~ g crb * f crb
   #  f ~ b crb * g crb
 
-  # forb cover in 2015 and crb forbs: check relationship
   # stepwise model removal
 
   tar_target(
