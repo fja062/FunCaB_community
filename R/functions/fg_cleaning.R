@@ -1,4 +1,4 @@
-fg_cleaning <- function(community_raw, gridded_climate) {
+fg_cleaning <- function(community_raw, gridded_climate, species_corrections_raw) {
   transition_community <- community_raw %>%
     # cleaning blockIDs
     mutate(blockID = case_when(
@@ -10,6 +10,13 @@ fg_cleaning <- function(community_raw, gridded_climate) {
       plotID == "Ves4C" ~ "Ves4",
       TRUE ~ blockID
     )) |>
+    # make species and cover corrections where necessary
+        left_join(species_corrections_raw |>
+                filter(!is.na(turfID)) |>
+                rename(species = old, plotID = turfID) |>
+                mutate(year = as.numeric(year)) |>
+                select(-functional_group, -cover),
+              by = c("year", "siteID", "plotID", "species")) |>
     # remove single occurence species
     filter(!species %in% c("Dan.dec", "Ver.ver")) |>
     # fix missing total_graminoids and total_forbs
