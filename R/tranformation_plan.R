@@ -76,7 +76,7 @@ transformation_plan <- list(
   # make community data, impute missing cover values, construct FG cover coefficients
   tar_target(
     name = community,
-    command = fg_cleaning(community_raw, gridded_climate) %>%
+    command = fg_cleaning(community_raw, gridded_climate, species_corrections_raw) %>%
       make_fg_cover_coefficients()
   ),
 
@@ -116,7 +116,7 @@ tar_target(
     name = fg_cover_biomass,
     command = fg_cover |>
       # join with removed biomass by common identifiers
-      tidylog::left_join(removed_biomass, 
+      tidylog::left_join(removed_biomass,
         by = join_by(siteID, blockID, plotID, fg_removed)) |>
       # remove controls with missing biomass data
       filter(!is.na(removed_biomass))
@@ -133,7 +133,7 @@ tar_target(
         filter(year == 2015) |>
         select(plotID, biomass_2015 = standing_biomass_calculated)
       # join 2015 biomass back to base
-      base |> 
+      base |>
         tidylog::left_join(biomass_2015, by = "plotID") |>
         mutate(delta_biomass = standing_biomass_calculated - biomass_2015)
     }
@@ -188,7 +188,7 @@ tar_target(
 # join response and explanatory variables for analysis
   tar_target(
     name = analysis_data,
-    command = biomass_coefficients |> 
+    command = biomass_coefficients |>
 
       # join with removed biomass
       # 147 biomass_coefficients plots do not join, because removed_biomass has no controls

@@ -22,6 +22,16 @@ download_plan <- list(
     format = "file"
   ),
 
+    # species corrections
+  tar_target(
+    name = species_corrections_download,
+    command =  get_file(node = "tx9r2",
+                        file = "FUNCAB_species_corrections.csv",
+                        path = "data",
+                        remote_path = "1_Vegetation/Raw_data"),
+    format = "file"
+  ),
+
     # plant functional traits
     tar_target(
       name = traits_download,
@@ -53,6 +63,12 @@ download_plan <- list(
   tar_target(
     name = community_raw,
     command =  read_csv(community_download)
+  ),
+
+    # species corrections
+  tar_target(
+    name = species_corrections_raw,
+    command =  read_csv(species_corrections_download)
   ),
 
     # plant functional traits
