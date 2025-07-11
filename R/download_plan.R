@@ -28,7 +28,7 @@ download_plan <- list(
     command =  get_file(node = "tx9r2",
                         file = "FUNCAB_species_corrections.csv",
                         path = "data",
-                        remote_path = "1_Vegetation/Raw_data"),
+                        remote_path = ""),
     format = "file"
   ),
 
