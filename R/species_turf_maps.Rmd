@@ -1,6 +1,6 @@
 ---
 title: "Check FunCaB species"
-output: pdf_document
+output: rmarkdown::html_vignette
 ---
 
 ```{r setup, include=FALSE}
