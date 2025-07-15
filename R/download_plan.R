@@ -2,13 +2,13 @@
 download_plan <- list(
 
   # download data
-  # biomass
+  # biomass 2022
   tar_target(
     name = removed_biomass_download,
-    command =  get_file(node = "4c5v2",
-                        file = "FunCaB_clean_biomass_2015-2021.csv",
+    command =  get_file(node = "tx9r2",
+                        file = "FUNDER_clean_biomass_2022.csv",
                         path = "data",
-                        remote_path = "1_Biomass_removal"),
+                        remote_path = "1_Vegetation/Clean_data"),
   format = "file"
   ),
 
