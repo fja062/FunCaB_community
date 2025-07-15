@@ -26,7 +26,7 @@ make_fancy_data <- function(data, gridded_climate, fix_treatment = TRUE){
       mutate(fg_remaining = case_when(
       treatment == "C" ~ "FGB",
       treatment == "FB" ~ "G",
-      treatment == "FGB" ~ "bare",
+      treatment == "FGB" ~ "none",
       treatment == "GB" ~ "F",
       treatment == "F" ~ "GB",
       treatment == "GF" ~ "B",
@@ -34,7 +34,8 @@ make_fancy_data <- function(data, gridded_climate, fix_treatment = TRUE){
       treatment == "G" ~ "FB",
       treatment == "XC" ~ "FGB",
       TRUE ~ NA_character_)) |>
-      rename(fg_removed = treatment)
+      rename(fg_removed = treatment) |>
+      mutate(fg_removed = if_else(fg_removed == "C", "none", fg_removed))
 
   } else {
     data2 <- data2
