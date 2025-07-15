@@ -85,6 +85,20 @@ figure_plan <- list(
       
       combined_plot
     }
+  ),
+
+  tar_target(
+    name = G_only_coeffs,
+    command = {
+      plot_model(single_fg_model$model, show.values = TRUE, vline.color = "grey60")
+    }
+  ),
+
+  tar_target(
+    name = G_only_interactions,
+    command = {
+      plot_model(single_fg_model$model, type = "pred", terms = c("precipitation", "crb_B"))
+    }
   )
 
 )
