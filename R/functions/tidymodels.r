@@ -1,74 +1,4 @@
-
-
-# Function: fit_scaled_mixed_model
-# 
-# This function provides a complete workflow for fitting mixed effects models with scaled predictors
-# using the tidymodels/recipes framework. It handles preprocessing, model fitting, prediction,
-# and backtransformation of predictors to their original scale.
-#
-# Parameters:
-#   data: Data frame containing the response and predictor variables
-#   fixed_formula: Formula for fixed effects only (e.g., y ~ x1 + x2) - used for scaling
-#   model_formula: Full model formula including interactions (e.g., y ~ x1 + x2 + x1:x2) - used for fitting
-#   random_effects: String specifying random effects (default: "(1 | siteID)")
-#   grouping_var: Name of the grouping variable for random effects (default: "siteID")
-#
-# Returns:
-#   A list containing:
-#     - model: The fitted lmer model object
-#     - scaled_data: Data frame with scaled predictors and predictions
-#     - original_data: Data frame with backtransformed predictors and predictions
-#
-# Example usage:
-#   results <- fit_scaled_mixed_model(
-#     data = my_data,
-#     fixed_formula = response ~ predictor1 + predictor2,
-#     model_formula = response ~ predictor1 + predictor2 + predictor1:predictor2,
-#     random_effects = "(1 | siteID)"
-#   )
-
-fit_scaled_mixed_model <- function(data, fixed_formula, model_formula, random_effects = "(1 | siteID)", grouping_var = "siteID") {
-  # Handle multiple grouping variables
-  if (length(grouping_var) > 1) {
-    grouping_vars_str <- paste(grouping_var, collapse = " + ")
-  } else {
-    grouping_vars_str <- grouping_var
-  }
-  
-  # 1. Create and prep the recipe for scaling predictors (include grouping vars but do not scale them)
-  rec <- recipe(
-    update(fixed_formula, paste(". ~ . +", grouping_vars_str)),
-    data = data
-  ) %>%
-    step_center(all_predictors(), -all_of(grouping_var)) %>%
-    step_scale(all_predictors(), -all_of(grouping_var))
-  rec_prep <- prep(rec)
-  # 2. Bake the scaled data
-  scaled_data <- bake(rec_prep, new_data = NULL)
-  # 3. Fit the mixed effects model using the scaled data
-  full_model_formula <- as.formula(
-    paste(paste(deparse(model_formula), collapse = " "), "+", random_effects)
-  )
-  fit <- lmer(
-    formula = full_model_formula,
-    data = scaled_data
-  )
-  # 4. Make predictions
-  scaled_data$pred <- predict(fit)
-  # 5. Backtransform predictors
-  center_vals <- rec_prep$steps[[1]]$means
-  scale_vals  <- rec_prep$steps[[2]]$sds
-  original_data <- scaled_data %>%
-    mutate(across(
-      all_of(names(center_vals)),
-      ~ .x * scale_vals[cur_column()] + center_vals[cur_column()]
-    ))
-  list(
-    model = fit,
-    scaled_data = scaled_data,
-    original_data = original_data
-  )
-}
+### Functions for tidymodels
 
 # Function: prepare_model_data
 #
@@ -139,3 +69,233 @@ prepare_model_data <- function(data, fg_present, fg_name, exclude_year = "2015")
   
   result
 }
+
+
+# Function: fit_scaled_mixed_model
+# 
+# This function provides a complete workflow for fitting mixed effects models with scaled predictors
+# using the tidymodels/recipes framework. It handles preprocessing, model fitting, prediction,
+# and backtransformation of predictors to their original scale.
+#
+# Parameters:
+#   data: Data frame containing the response and predictor variables
+#   fixed_formula: Formula for fixed effects only (e.g., y ~ x1 + x2) - used for scaling
+#   model_formula: Full model formula including interactions (e.g., y ~ x1 + x2 + x1:x2) - used for fitting
+#   random_effects: String specifying random effects (default: "(1 | siteID)")
+#   grouping_var: Name of the grouping variable for random effects (default: "siteID")
+#
+# Returns:
+#   A list containing:
+#     - model: The fitted lmer model object
+#     - scaled_data: Data frame with scaled predictors and predictions
+#     - original_data: Data frame with backtransformed predictors and predictions
+#
+# Example usage:
+#   results <- fit_scaled_mixed_model(
+#     data = my_data,
+#     fixed_formula = response ~ predictor1 + predictor2,
+#     model_formula = response ~ predictor1 + predictor2 + predictor1:predictor2,
+#     random_effects = "(1 | siteID)"
+#   )
+
+fit_scaled_mixed_model <- function(data, fixed_formula, model_formula, random_effects = "(1 | siteID)", grouping_var = "siteID") {
+  # Handle multiple grouping variables
+  if (length(grouping_var) > 1) {
+    grouping_vars_str <- paste(grouping_var, collapse = " + ")
+  } else {
+    grouping_vars_str <- grouping_var
+  }
+  
+  # 1. Create and prep the recipe for scaling predictors (include grouping vars but do not scale them)
+  rec <- recipe(
+    update(fixed_formula, paste(". ~ . +", grouping_vars_str)),
+    data = data
+  ) %>%
+    step_center(all_predictors(), -all_of(grouping_var)) %>%
+    step_scale(all_predictors(), -all_of(grouping_var))
+  rec_prep <- prep(rec)
+  # 2. Bake the scaled data
+  scaled_data <- bake(rec_prep, new_data = NULL)
+  # 3. Fit the mixed effects model using the scaled data
+  full_model_formula <- as.formula(
+    paste(paste(deparse(model_formula), collapse = " "), "+", random_effects)
+  )
+  fit <- lmerTest::lmer(
+    formula = full_model_formula,
+    data = scaled_data
+  )
+  # 4. Make predictions
+  scaled_data$pred <- predict(fit)
+  # 5. Backtransform predictors
+  center_vals <- rec_prep$steps[[1]]$means
+  scale_vals  <- rec_prep$steps[[2]]$sds
+  original_data <- scaled_data %>%
+    mutate(across(
+      all_of(names(center_vals)),
+      ~ .x * scale_vals[cur_column()] + center_vals[cur_column()]
+    ))
+  list(
+    model = fit,
+    scaled_data = scaled_data,
+    original_data = original_data
+  )
+}
+
+
+# Function: fit_lmer_with_drop1
+#
+# Fits a full lmer model with all main effects and interactions, then runs drop1 for LRTs.
+# Arguments:
+#   data: Data frame
+#   response: Name of response variable (string)
+#   predictors: Character vector of predictor variable names (main effects)
+#   random_effect: Name of random effect grouping variable (string)
+#   add_fixed: Optional string for additional fixed effects (e.g., 'year')
+# Returns:
+#   A list with the fitted model and drop1 results
+fit_lmer_with_drop1 <- function(data, response, predictors, random_effect, add_fixed = NULL) {
+  library(lme4)
+  # Build formula string
+  interaction_part <- paste(predictors, collapse = " * ")
+  fixed_part <- interaction_part
+  if (!is.null(add_fixed)) {
+    fixed_part <- paste(fixed_part, "+", add_fixed)
+  }
+  formula_str <- paste0(response, " ~ ", fixed_part, " + (1 | ", random_effect, ")")
+  formula_obj <- as.formula(formula_str)
+  # Fit model
+  model <- lmer(formula_obj, data = data, REML = FALSE)
+  # Run drop1 for LRTs
+  lrt <- drop1(model, test = "Chisq")
+  list(model = model, drop1 = lrt)
+}
+
+# Function: test_all_effects_lmer
+#
+# Tests all main effects and interactions for a user-specified model using a two-step approach.
+# Arguments:
+#   data: Data frame
+#   response: Name of response variable (string)
+#   predictors: Character vector of predictor variable names (main effects)
+#   random_effect: Name of random effect grouping variable (string)
+#   add_fixed: Optional string for additional fixed effects (e.g., 'year')
+# Prints:
+#   - LRT for all interactions (full vs. main effects only)
+#   - LRT for each main effect (if interaction not significant)
+#   - LRT for each interaction (if interaction significant)
+# Returns:
+#   - List with main_model and full_model
+
+test_all_effects_lmer <- function(data, response, predictors, random_effect, add_fixed = NULL) {
+  library(lme4)
+  # Build formula strings
+  interaction_part <- paste(predictors, collapse = " * ")
+  fixed_part <- interaction_part
+  if (!is.null(add_fixed)) {
+    fixed_part <- paste(fixed_part, "+", add_fixed)
+  }
+  # Full model (with all interactions)
+  full_formula <- as.formula(
+    paste0(response, " ~ ", fixed_part, " + (1 | ", random_effect, ")")
+  )
+  # Main effects only (no interactions)
+  main_formula <- as.formula(
+    paste0(response, " ~ ", paste(predictors, collapse = " + "),
+           if (!is.null(add_fixed)) paste0(" + ", add_fixed) else "",
+           " + (1 | ", random_effect, ")")
+  )
+  # Fit models
+  main_model <- lmer(main_formula, data = data, REML = FALSE)
+  full_model <- lmer(full_formula, data = data, REML = FALSE)
+  # Test interaction(s)
+  cat("=== Test for all interactions ===\n")
+  print(anova(main_model, full_model))
+  # If interaction is not significant, test main effects
+  cat("\n=== Test for main effects (if interaction not significant) ===\n")
+  print(drop1(main_model, test = "Chisq"))
+  # If interaction is significant, test which interaction(s) are important
+  cat("\n=== Test for each interaction (if interaction significant) ===\n")
+  print(drop1(full_model, test = "Chisq"))
+  invisible(list(main_model = main_model, full_model = full_model))
+}
+
+# test_all_effects_lmer(
+#   data = G_only,
+#   response = "delta_biomass",
+#   predictors = c("crb_B", "crb_F", "precipitation"),
+#   random_effect = "siteID",
+#   add_fixed = "year"
+# )
+
+# Function: test_each_interaction_lmer
+#
+# Tests each interaction (two-way and three-way) individually by dropping them one at a time from the full model and comparing with the full model.
+# Arguments:
+#   data: Data frame
+#   response: Name of response variable (string)
+#   predictors: Character vector of predictor variable names (main effects)
+#   random_effect: Name of random effect grouping variable (string)
+#   add_fixed: Optional string for additional fixed effects (e.g., 'year')
+# Prints:
+#   - LRT for each interaction term (two-way and three-way)
+# Returns:
+#   - The full model (invisible)
+
+test_each_interaction_lmer <- function(data, response, predictors, random_effect, add_fixed = NULL) {
+  library(lme4)
+  # Ensure random effect is a factor and present
+  if (!random_effect %in% names(data)) stop("Random effect column not found in data.")
+  data[[random_effect]] <- as.factor(data[[random_effect]])
+  # Build full formula
+  full_formula <- as.formula(
+    paste0(
+      response, " ~ (", paste(predictors, collapse = " * "), ")",
+      if (!is.null(add_fixed)) paste0(" + ", add_fixed) else "",
+      " + (1 | ", random_effect, ")"
+    )
+  )
+  print(full_formula)
+  full_model <- lmer(full_formula, data = data, REML = FALSE)
+  all_terms <- attr(terms(full_formula), "term.labels")
+  cat("All terms:", paste(all_terms, collapse = ", "), "\n")
+  interaction_terms <- all_terms[grepl(":", all_terms)]
+  if (length(interaction_terms) == 0) {
+    cat("No interaction terms in the model.\n")
+    return(invisible(NULL))
+  }
+  for (term in interaction_terms) {
+    reduced_terms <- setdiff(all_terms, term)
+    cat("Reduced terms:", paste(reduced_terms, collapse = ", "), "\n")
+    rhs_parts <- c()
+    if (length(reduced_terms) > 0) {
+      rhs_parts <- c(rhs_parts, reduced_terms)
+    }
+    if (!is.null(add_fixed)) {
+      rhs_parts <- c(rhs_parts, add_fixed)
+    }
+    # Only use '1' if there are no other terms at all
+    if (length(rhs_parts) == 0) {
+      rhs <- "1"
+    } else {
+      rhs <- paste(rhs_parts, collapse = " + ")
+    }
+    cat("RHS parts:", paste(rhs_parts, collapse = ", "), "\n")
+    cat("RHS:", rhs, "\n")
+    formula_str <- paste0(response, " ~ ", rhs, " + (1 | ", random_effect, ")")
+    print(formula_str)  # Print the formula for debugging
+    reduced_formula <- as.formula(formula_str)
+    reduced_model <- lmer(reduced_formula, data = data, REML = FALSE)
+    cat("\n=== Test for interaction:", term, "===\n")
+    print(anova(reduced_model, full_model))
+  }
+  invisible(full_model)
+}
+
+# test_each_interaction_lmer(
+#   data = G_only |> mutate(siteID = as.factor(siteID)),
+#   response = "delta_biomass",
+#   predictors = c("crb_B", "crb_F"),
+#   random_effect = "siteID",
+#   add_fixed = "year"
+# )
+
