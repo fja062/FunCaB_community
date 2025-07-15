@@ -125,3 +125,21 @@ clean_ovstedalen_2018_duplicates <- function(data) {
   return(cleaned_data)
 }
 
+#' Remove rows where removed_fg contains letters not present in fg_removed
+#' @param df A data frame with columns removed_fg and fg_removed
+#' @return The input data frame with invalid rows removed
+remove_invalid_removed_fg_rows <- function(df) {
+  library(stringr)
+  is_valid_removed_fg <- function(removed_fg, fg_removed) {
+    removed_letters <- str_split(removed_fg, "", simplify = TRUE)
+    fg_letters <- str_split(fg_removed, "", simplify = TRUE)
+    all(removed_letters %in% fg_letters)
+  }
+  df <- df %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(valid = is_valid_removed_fg(removed_fg, fg_removed)) %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(valid) %>%
+    dplyr::select(-valid)
+  return(df)
+}

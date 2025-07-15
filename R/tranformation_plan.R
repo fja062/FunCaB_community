@@ -45,7 +45,9 @@ transformation_plan <- list(
       filter(treatment != "XC") %>%
       # fix blockID
       funcabization(., convert_to = "Funder") %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
+      # remove invalid removed_fg rows
+      remove_invalid_removed_fg_rows()
   ),
 
   # prep biomass (2022 only)
@@ -64,7 +66,8 @@ transformation_plan <- list(
     name = removed_biomass,
     command = biomass |>
       # remove mistakenly cut forb biomass from Ovs1B in 2019
-      filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
+      # MADE A FUNCTION THAT REMOVES THIS. SHOULD REMOVED_FG == B ALSO BE REMOVED?
+      #filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
       # add 2022 data
       bind_rows(biomass_22) |>
       # sum biomass across years
