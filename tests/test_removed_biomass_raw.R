@@ -2,9 +2,8 @@ library(testthat)
 library(dplyr)
 library(ggplot2)
 
-# Load the data (assume removed_biomass_raw is available in the environment)
-test_that("removed_biomass_raw only contains 2022 data", {
-  expect_true(all(removed_biomass_raw$year == 2022))
+test_that("removed_biomass_raw only contains data from 2015 to 2021", {
+  expect_true(all(removed_biomass_raw$year >= 2015 & removed_biomass_raw$year <= 2021))
 })
 
 test_that("removed_biomass_raw has 12 unique siteIDs", {
@@ -70,7 +69,7 @@ biomass_plot <- ggplot(removed_biomass_raw, aes(x = removed_fg, y = biomass, col
   labs(title = "Biomass by removed_fg with outliers highlighted", color = "Outlier") +
   theme_minimal()
 
-ggsave(filename = "tests/biomass_by_removed_fg_outliers.png", plot = biomass_plot, width = 8, height = 5)
+ggsave(filename = "tests/biomass_by_removed_fg_outliers_raw.png", plot = biomass_plot, width = 8, height = 5)
 
 test_that("All treatments are valid", {
   allowed_treatments <- c("GF", "FB", "GB", "C", "G", "F", "B", "FGB")
@@ -82,8 +81,6 @@ test_that("blockID is first 3 letters of siteID plus a digit 1-4", {
 })
 
 test_that("plotID is a combination of blockID and treatment", {
-  # Accept plotID as blockID followed by treatment (no separator or with a separator)
-  # Try both with and without a separator (e.g., Ovs1A or Ovs1_A)
   block_treat <- paste0(removed_biomass_raw$blockID, removed_biomass_raw$treatment)
   block_treat_sep <- paste0(removed_biomass_raw$blockID, "_", removed_biomass_raw$treatment)
   expect_true(all(removed_biomass_raw$plotID == block_treat | removed_biomass_raw$plotID == block_treat_sep))
