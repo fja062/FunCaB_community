@@ -36,24 +36,10 @@ transformation_plan <- list(
     command = removed_biomass_raw %>%
       # convert to Funder format
       funcabization(., convert_to = "Funder") %>% 
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
+      # remove litter
+      filter(removed_fg != "L")
   ),
-
-  # # sum biomass between 2015 and 2019 (without XC)
-  # tar_target(
-  #   name = removed_biomass,
-  #   command = biomass |>
-  #     # remove extra plots in 2016
-  #     filter(fg_removed != "XC") |>
-  #     # remove 2020 data |>
-  #     filter(year < 2020) |>
-  #     # remove mistakenly cut forb biomass from Ovs1B in 2019
-  #     filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
-  #     # sum biomass across years
-  #     group_by(siteID, temperature_level, precipitation_level, blockID, plotID, fg_removed, removed_fg) |>
-  #     summarise(removed_biomass = sum(biomass)) |>
-  #     ungroup()
-  # ),
 
 
   # make community data, impute missing cover values, construct FG cover coefficients
