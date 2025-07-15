@@ -6,7 +6,9 @@ library(tarchetypes)
 
 # Set target options:
 tar_option_set(
-  packages = c("tidyverse", "dataDownloader", "vegan", "ggvegan", "Hmisc", "glue", "traitstrap", "dataDocumentation", "lme4", "broom", "broom.mixed", "lmerTest", "tidymodels", "sjPlot", "patchwork"), # packages that your targets need to run
+  packages = c(
+    "tidyverse", "dataDownloader", "vegan", "ggvegan", "Hmisc", "glue", "traitstrap", "dataDocumentation", "lme4", "broom", "broom.mixed", "lmerTest", "tidymodels", "sjPlot", "patchwork"
+  ) # packages that your targets need to run
   #format = "rds" # default storage format
 )
 
@@ -20,8 +22,8 @@ tar_source(files = "R")
 # Replace the target list below with your own:
 list(
   download_plan,
-  transformation_plan,
-  analysis_plan,
-  figure_plan,
-  manuscript_plan
+  transformation_plan
+  #analysis_plan,
+  #figure_plan,
+  #manuscript_plan
 )
