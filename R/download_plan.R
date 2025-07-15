@@ -2,9 +2,21 @@
 download_plan <- list(
 
   # download data
+
+  # biomass data
+  # biomass 2015-2021
+    tar_target(
+    name = removed_biomass_download,
+    command =  get_file(node = "4c5v2",
+                        file = "FunCaB_clean_biomass_2015-2021.csv",
+                        path = "data",
+                        remote_path = "1_Biomass_removal"),
+  format = "file"
+  ),
+
   # biomass 2022
   tar_target(
-    name = removed_biomass_download,
+    name = removed_biomass_final_download,
     command =  get_file(node = "tx9r2",
                         file = "FUNDER_clean_biomass_2022.csv",
                         path = "data",
@@ -57,6 +69,11 @@ download_plan <- list(
   tar_target(
     name = removed_biomass_raw,
     command =  read_csv(removed_biomass_download)
+  ),
+    # 2022
+    tar_target(
+    name = removed_biomass_final_raw,
+    command =  read_csv(removed_biomass_final_download)
   ),
 
   # community composition

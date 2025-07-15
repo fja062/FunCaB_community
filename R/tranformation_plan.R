@@ -30,15 +30,45 @@ transformation_plan <- list(
     }
   ),
 
-  # prep biomass (2022 only)
+  # prep biomass
+  # 2015-2021
   tar_target(
     name = biomass,
-    command = removed_biomass_raw %>%
+    command = removed_biomass_raw |>
+      # Clean 2018 Ovstedalen duplicates
+      clean_ovstedalen_2018_duplicates() |>
+      mutate(plotID = if_else(
+        treatment == "GF" & str_detect(plotID, "FG"),
+          str_replace(plotID, "FG", "GF"),
+          plotID)) |>
+      # remove extra plots in 2016
+      filter(treatment != "XC") %>%
+      # fix blockID
+      funcabization(., convert_to = "Funder") %>%
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+  ),
+
+  # prep biomass (2022 only)
+  tar_target(
+    name = biomass_22,
+    command = removed_biomass_final_raw %>%
       # convert to Funder format
       funcabization(., convert_to = "Funder") %>% 
       make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
       # remove litter
       filter(removed_fg != "L")
+  ),
+
+  # sum biomass between 2015 and 2022 (without XC)
+  tar_target(
+    name = removed_biomass,
+    command = biomass |>
+      # remove mistakenly cut forb biomass from Ovs1B in 2019
+      filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
+      # sum biomass across years
+      group_by(siteID, temperature_level, precipitation_level, blockID, plotID, fg_removed, removed_fg) |>
+      summarise(removed_biomass = sum(biomass)) |>
+      ungroup()
   ),
 
 
