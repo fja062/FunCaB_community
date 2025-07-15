@@ -65,9 +65,11 @@ transformation_plan <- list(
     command = biomass |>
       # remove mistakenly cut forb biomass from Ovs1B in 2019
       filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
+      # add 2022 data
+      bind_rows(biomass_22) |>
       # sum biomass across years
-      group_by(siteID, temperature_level, precipitation_level, blockID, plotID, fg_removed, removed_fg) |>
-      summarise(removed_biomass = sum(biomass)) |>
+      group_by(siteID, blockID, plotID, fg_removed, removed_fg, fg_remaining, fg_richness, temperature_level, precipitation_level, temperature, precipitation) |>
+      summarise(cumulative_removed_biomass = sum(biomass)) |>
       ungroup()
   ),
 
