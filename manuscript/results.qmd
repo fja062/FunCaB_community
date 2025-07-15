@@ -29,3 +29,27 @@ tar_load(fg_cover_biomass_panels)
 # Display the figure
 fg_cover_biomass_panels
 ```
+
+### Model Coefficients and Interactions for Graminoid-only Plots
+
+```{r}
+#| label: fig-g-only-coeffs-interactions
+#| fig-cap: "Model results for graminoid-only plots. (a) Estimated coefficients from the mixed model. (b) Predicted interaction effects between precipitation and crb_B."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load required libraries
+library(ggplot2)
+library(patchwork)
+library(sjPlot)
+library(targets)
+
+# Load the figures from targets
+tar_load(G_only_coeffs)
+tar_load(G_only_interactions)
+
+# Combine the two plots and label as a and b
+(G_only_coeffs + G_only_interactions) +
+  plot_annotation(tag_levels = 'a')
+```
