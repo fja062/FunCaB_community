@@ -47,7 +47,8 @@ transformation_plan <- list(
       funcabization(., convert_to = "Funder") %>%
       make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
       # remove invalid removed_fg rows
-      remove_invalid_removed_fg_rows()
+      remove_invalid_removed_fg_rows() |>
+      mutate(fg_status = "remaining")
   ),
 
   # prep biomass (2022 only)
@@ -58,7 +59,10 @@ transformation_plan <- list(
       funcabization(., convert_to = "Funder") %>% 
       make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
       # remove litter
-      filter(removed_fg != "L")
+      filter(removed_fg != "L") |>
+      # annotate 2022 fg status
+      annotate_2022_fg_status() |>
+      select(-no_treatment)
   ),
 
   # sum biomass between 2015 and 2022 (without XC)
@@ -71,7 +75,7 @@ transformation_plan <- list(
       # add 2022 data
       bind_rows(biomass_22) |>
       # sum biomass across years
-      group_by(siteID, blockID, plotID, fg_removed, removed_fg, fg_remaining, fg_richness, temperature_level, precipitation_level, temperature, precipitation) |>
+      group_by(siteID, blockID, plotID, fg_removed, removed_fg, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature, precipitation) |>
       summarise(cumulative_removed_biomass = sum(biomass)) |>
       ungroup()
   ),
