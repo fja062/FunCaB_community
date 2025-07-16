@@ -253,3 +253,28 @@ compare_full_vs_2way_lmer <- function(data, response, predictor, random_effect =
   return(list(model_2way = model_2way, model_full = model_full, lrt = lrt))
 }
 
+#' Tidy a model object using broom::tidy
+#' @param model A model object (e.g., from lmerTest::lmer or lm)
+#' @return A tidy data frame of model results
+tidy_model <- function(model) {
+  broom::tidy(model)
+}
+
+#' Run model diagnostics using performance::check_model
+#' @param model A model object (e.g., from lmerTest::lmer or lm)
+#' @return The result of performance::check_model(model)
+check_model_diagnostics <- function(model) {
+  performance::check_model(model)
+}
+
+#' Plot model effects using sjPlot::plot_model, add grey zero line and theme_bw
+#' @param model A model object (e.g., from lmerTest::lmer or lm)
+#' @param ... Additional arguments passed to sjPlot::plot_model
+#' @return A ggplot object
+plot_model_effects <- function(model, ...) {
+  # Use unbuilt=TRUE to get the ggplot object before printing
+  p <- sjPlot::plot_model(model,  vline.color = "grey50", ...) +
+    ggplot2::theme_bw()
+  p
+}
+
