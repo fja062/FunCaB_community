@@ -122,6 +122,7 @@ fit_scaled_mixed_model <- function(data, fixed_formula, model_formula, random_ef
   )
   fit <- lmerTest::lmer(
     formula = full_model_formula,
+    control = lmerControl(optimizer = "bobyqa"),
     data = scaled_data
   )
   # 4. Make predictions
@@ -227,75 +228,28 @@ test_all_effects_lmer <- function(data, response, predictors, random_effect, add
 #   add_fixed = "year"
 # )
 
-# Function: test_each_interaction_lmer
-#
-# Tests each interaction (two-way and three-way) individually by dropping them one at a time from the full model and comparing with the full model.
-# Arguments:
-#   data: Data frame
-#   response: Name of response variable (string)
-#   predictors: Character vector of predictor variable names (main effects)
-#   random_effect: Name of random effect grouping variable (string)
-#   add_fixed: Optional string for additional fixed effects (e.g., 'year')
-# Prints:
-#   - LRT for each interaction term (two-way and three-way)
-# Returns:
-#   - The full model (invisible)
-
-test_each_interaction_lmer <- function(data, response, predictors, random_effect, add_fixed = NULL) {
-  library(lme4)
-  # Ensure random effect is a factor and present
-  if (!random_effect %in% names(data)) stop("Random effect column not found in data.")
-  data[[random_effect]] <- as.factor(data[[random_effect]])
-  # Build full formula
+#' Compare full 3-way interaction model to 2-way interaction model using LRT
+#' @param data Data frame
+#' @param response Name of response variable (string)
+#' @param predictor Name of main predictor (string)
+#' @param random_effect Name of random effect grouping variable (string, default 'siteID')
+#' @return List with both models and the anova table
+compare_full_vs_2way_lmer <- function(data, response, predictor, random_effect = "siteID") {
+  # Build formula strings
+  # Full model: response ~ predictor * precipitation_scaled * temperature_scaled + (1|random_effect)
   full_formula <- as.formula(
-    paste0(
-      response, " ~ (", paste(predictors, collapse = " * "), ")",
-      if (!is.null(add_fixed)) paste0(" + ", add_fixed) else "",
-      " + (1 | ", random_effect, ")"
-    )
+    paste0(response, " ~ ", predictor, " * precipitation_scaled * temperature_scaled + (1|", random_effect, ")")
   )
-  print(full_formula)
-  full_model <- lmer(full_formula, data = data, REML = FALSE)
-  all_terms <- attr(terms(full_formula), "term.labels")
-  cat("All terms:", paste(all_terms, collapse = ", "), "\n")
-  interaction_terms <- all_terms[grepl(":", all_terms)]
-  if (length(interaction_terms) == 0) {
-    cat("No interaction terms in the model.\n")
-    return(invisible(NULL))
-  }
-  for (term in interaction_terms) {
-    reduced_terms <- setdiff(all_terms, term)
-    cat("Reduced terms:", paste(reduced_terms, collapse = ", "), "\n")
-    rhs_parts <- c()
-    if (length(reduced_terms) > 0) {
-      rhs_parts <- c(rhs_parts, reduced_terms)
-    }
-    if (!is.null(add_fixed)) {
-      rhs_parts <- c(rhs_parts, add_fixed)
-    }
-    # Only use '1' if there are no other terms at all
-    if (length(rhs_parts) == 0) {
-      rhs <- "1"
-    } else {
-      rhs <- paste(rhs_parts, collapse = " + ")
-    }
-    cat("RHS parts:", paste(rhs_parts, collapse = ", "), "\n")
-    cat("RHS:", rhs, "\n")
-    formula_str <- paste0(response, " ~ ", rhs, " + (1 | ", random_effect, ")")
-    print(formula_str)  # Print the formula for debugging
-    reduced_formula <- as.formula(formula_str)
-    reduced_model <- lmer(reduced_formula, data = data, REML = FALSE)
-    cat("\n=== Test for interaction:", term, "===\n")
-    print(anova(reduced_model, full_model))
-  }
-  invisible(full_model)
+  # 2-way model: response ~ predictor + precipitation_scaled + temperature_scaled + predictor:precipitation_scaled + predictor:temperature_scaled + precipitation_scaled:temperature_scaled + (1|random_effect)
+  twoway_formula <- as.formula(
+    paste0(response, " ~ ", predictor, " + precipitation_scaled + temperature_scaled + ",
+           predictor, ":precipitation_scaled + ", predictor, ":temperature_scaled + precipitation_scaled:temperature_scaled + (1|", random_effect, ")")
+  )
+  # Fit models
+  model_full <- lmerTest::lmer(full_formula, data = data)
+  model_2way <- lmerTest::lmer(twoway_formula, data = data)
+  # Likelihood ratio test
+  lrt <- anova(model_2way, model_full)
+  return(list(model_2way = model_2way, model_full = model_full, lrt = lrt))
 }
-
-# test_each_interaction_lmer(
-#   data = G_only |> mutate(siteID = as.factor(siteID)),
-#   response = "delta_biomass",
-#   predictors = c("crb_B", "crb_F"),
-#   random_effect = "siteID",
-#   add_fixed = "year"
-# )
 
