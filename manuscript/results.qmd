@@ -7,6 +7,7 @@ editor: visual
 #| echo: false
 library(targets)
 library(tarchetypes)
+library(gt)
 
 ```
 
@@ -28,4 +29,31 @@ tar_load(fig_fg_richness_effects)
 
 # Display plot
 fig_fg_richness_effects
+```
+
+```{r}
+#| label: fg-richness-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_richness
+if (!exists("fg_richness_tidy")) tar_load(fg_richness_tidy)
+
+pretty_model_table(fg_richness_tidy)
+
+```
+
+### Functional group identity effects
+
+```{r}
+#| label: fg-identity-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_identity
+if (!exists("fg_identity_tidy")) tar_load(fg_identity_tidy)
+
+pretty_model_table(fg_identity_tidy)
 ```
