@@ -1,6 +1,6 @@
-|                |
-|:---------------|
-| editor: visual |
+---
+editor: visual
+---
 
 ```{r}
 #| label: set-up-methods

@@ -62,10 +62,14 @@ execute:
   out-width: '100%'
 ---
 
-{{< include introduction.qmd >}}
+```{r, child="manuscript/introduction.qmd"}
+```
 
-{{< include methods.qmd >}}
+```{r, child="manuscript/methods.qmd"}
+```
 
-{{< include results.qmd >}}
+```{r, child="manuscript/results.qmd"}
+```
 
-{{< include discussion.qmd >}}
+```{r, child="manuscript/discussion.qmd"}
+```
