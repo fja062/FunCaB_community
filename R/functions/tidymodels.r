@@ -298,3 +298,25 @@ clean_model_terms <- function(tidy_df) {
   return(df)
 }
 
+#' Create a pretty gt table from cleaned model output
+#' @param df A cleaned tidy model output data frame (from clean_model_terms)
+#' @return A gt table with rounded numbers and bold significant p-values
+pretty_model_table <- function(df) {
+  library(gt)
+  df |>
+    dplyr::select(-signif) |>
+    dplyr::mutate(
+      estimate = round(estimate, 2),
+      std.error = round(std.error, 2),
+      p.value = round(p.value, 3)
+    ) |>
+    gt::gt() |>
+    gt::tab_style(
+      style = gt::cell_text(weight = "bold"),
+      locations = gt::cells_body(
+        columns = c(estimate, std.error, p.value),
+        rows = p.value < 0.05
+      )
+    )
+}
+
