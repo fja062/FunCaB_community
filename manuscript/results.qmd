@@ -12,44 +12,20 @@ library(tarchetypes)
 
 ## Results
 
-Here we can add figures, tables and results...
+### PART 1: Functional group richness effect
 
-### Functional Group Cover vs Removed Biomass
+Test overall effects of number of functional groups (functional group richness) on standing biomass across the climate grid.
 
 ```{r}
-#| label: fig-fg-cover-biomass
-#| fig-cap: "Relationship between functional group cover and removed biomass. Left panel shows graminoid cover vs removed biomass for plots where graminoids were removed. Right panel shows forb cover vs removed biomass for plots where forbs were removed. Regression lines with 95% confidence intervals are shown."
+#| label: fig-fg-fichness-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
 #| echo: false
 #| warning: false
 #| message: false
 
 # Load the figure from targets
-tar_load(fg_cover_biomass_panels)
+tar_load(fig_fg_richness_effects)
 
-# Display the figure
-fg_cover_biomass_panels
-```
-
-### Model Coefficients and Interactions for Graminoid-only Plots
-
-```{r}
-#| label: fig-g-only-coeffs-interactions
-#| fig-cap: "Model results for graminoid-only plots. (a) Estimated coefficients from the mixed model. (b) Predicted interaction effects between precipitation and crb_B."
-#| echo: false
-#| warning: false
-#| message: false
-
-# Load required libraries
-library(ggplot2)
-library(patchwork)
-library(sjPlot)
-library(targets)
-
-# Load the figures from targets
-tar_load(G_only_coeffs)
-tar_load(G_only_interactions)
-
-# Combine the two plots and label as a and b
-(G_only_coeffs + G_only_interactions) +
-  plot_annotation(tag_levels = 'a')
+# Display plot
+fig_fg_richness_effects
 ```

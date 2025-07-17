@@ -24,6 +24,6 @@ list(
   download_plan,
   transformation_plan,
   analysis_plan,
-  #figure_plan,
+  figure_plan,
   manuscript_plan
 )
