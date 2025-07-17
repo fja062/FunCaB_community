@@ -147,6 +147,12 @@ tar_target(
   #   }
   # ),
 
+  # calculate diversity metrics
+  tar_target(
+    name = diversity,
+    command = calc_diversity(cover_data)
+  ),
+
 
 tar_target(
   name = traits,
