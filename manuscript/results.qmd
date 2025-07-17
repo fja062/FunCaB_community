@@ -57,3 +57,17 @@ if (!exists("fg_identity_tidy")) tar_load(fg_identity_tidy)
 
 pretty_model_table(fg_identity_tidy)
 ```
+
+```{r}
+#| label: fig-fg-identity-interactions
+#| fig-cap: "Interaction effects from the mixed-effects model for functional group identity on standing biomass. The plot displays estimated interaction effects between functional group identity and environmental variables."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_fg_identity_interactions")) tar_load(fig_fg_identity_interactions)
+
+# Display plot
+fig_fg_identity_interactions
+```
