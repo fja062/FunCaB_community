@@ -24,7 +24,10 @@ manuscript_plan <- list(
 
   # Results
   tar_render(name = results,
-             path = "manuscript/results.qmd")
+             path = "manuscript/results.qmd"),
+
+  tar_render(name = si,
+             path = "manuscript/si_model_assumption_checking.qmd")     
 
 
 )
