@@ -278,3 +278,23 @@ plot_model_effects <- function(model, ...) {
   p
 }
 
+#' Clean and relabel model terms for presentation
+#' @param tidy_df A tidy model output data frame (from broom::tidy)
+#' @return A cleaned data frame with relabeled terms, random effects removed, and significance marked
+clean_model_terms <- function(tidy_df) {
+  # Remove random effects rows (terms starting with sd__ or containing Observation)
+  df <- tidy_df |>
+    dplyr::filter(!grepl("^sd__|Observation", term))
+  # Relabel terms using str_replace for partial matches
+  df <- df |>
+    dplyr::mutate(
+      term = term |>
+        str_replace_all("fg_removed", "") |>
+        str_replace_all("precipitation_scaled", "P") |>
+        str_replace_all("temperature_scaled", "T"),
+      signif = dplyr::if_else(!is.na(p.value) & p.value < 0.05, "*", "")
+    ) |>
+    dplyr::select(term, estimate, std.error, p.value, signif)
+  return(df)
+}
+
