@@ -18,7 +18,7 @@ library(performance)
 
 # Check model diagnostics
 
-## Part 1: Effect of removed biomass on remaining biomass
+## Part 1: General effect of removed biomass on remaining biomass
 
 ### Functional group richness
 ```{r}
@@ -63,5 +63,37 @@ tar_load(fg_biomass_analysis)
 
 # Check model diagnostics for the 2-way model
 result <- check_model_diagnostics(fg_biomass_analysis)
+result  # This will plot the diagnostics
+``` 
+
+## Part 2: single groups
+
+### Functional group richness (Graminoids only)
+```{r}
+#| label: fig-fg-richness-G-diagnostics
+#| echo: false
+#| message: false
+#| fig-height: 12
+
+# Load the fg_richness_G_analysis target
+tar_load(fg_richness_G_analysis)
+
+# Check model diagnostics for the 2-way model
+result <- check_model_diagnostics(fg_richness_G_analysis$model_2way)
+result  # This will plot the diagnostics
+```
+
+### Functional group identity (Graminoids only)
+```{r}
+#| label: fig-fg-identity-G-diagnostics
+#| echo: false
+#| message: false
+#| fig-height: 12
+
+# Load the fg_identity_G_analysis target
+tar_load(fg_identity_G_analysis)
+
+# Check model diagnostics for the 2-way model
+result <- check_model_diagnostics(fg_identity_G_analysis$model_2way)
 result  # This will plot the diagnostics
 ``` 
