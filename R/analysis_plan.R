@@ -51,10 +51,19 @@ analysis_plan <- list(
       # merge cumulative removed biomass with standing biomass
       dat <- sb_long |> 
         tidylog::left_join(crb_long, 
-          by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled"))
+          by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")) |> 
+          mutate(fg_removed = factor(fg_removed, 
+             levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")))
 
-      # lmerTest::lmer()
+      # full model
+      fit <- lmerTest::lmer(standing_biomass ~ cumulative_removed_biomass * fg_removed * temperature_scaled * precipitation_scaled + (1|siteID), data = dat)
+      # simpler model
+      fit2 <- lmerTest::lmer(standing_biomass ~ cumulative_removed_biomass + fg_removed + temperature_scaled + precipitation_scaled + cumulative_removed_biomass:fg_removed + cumulative_removed_biomass * temperature_scaled * precipitation_scaled + fg_removed * temperature_scaled * precipitation_scaled + (1|siteID), data = dat)
+      anova(fit, fit2)
+      summary(fit2)
+      dat |> distinct(fg_removed, fg_remaining, removed_fg)
 
+      # make function for more than 3 way interactions?
       # # compare full vs 2-way model
       # results <- compare_full_vs_2way_lmer(
       #   data = dat,
