@@ -90,30 +90,46 @@ analysis_plan <- list(
   # PART 2: Single group effects
   # Graminoids present
 
-  # functional group richness
+    # Create a long dataset for each focal functional group present in fg_remaining
   tar_target(
-    name = fg_richness_G_analysis,
+    name = standing_biomass_by_focal_fg,
     command = {
-      # prepare data
-      dat <- standing_biomass_22 |>
-        filter(str_detect(fg_remaining, "G")) |>
-        # sum biomass by fg_removed and remaining
-        group_by(siteID, blockID, plotID, fg_removed, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
-        summarise(standing_biomass = sum(biomass), .groups = "drop")
-
-      # compare full vs 2-way model
-      results <- compare_full_vs_2way_lmer(
-        data = dat,
-        response = "standing_biomass",
-        predictor = "fg_richness"
-      )
+      fgs <- c("G" = "graminoids", "F" = "forbs", "B" = "bryophytes")
+      purrr::map_dfr(names(fgs), function(fg_code) {
+        standing_biomass_22 %>%
+          filter(str_detect(fg_remaining, fg_code)) %>%
+          mutate(focal_fg = fgs[[fg_code]]) %>%
+          group_by(siteID, blockID, plotID, fg_removed, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled, focal_fg) %>%
+          summarise(standing_biomass = sum(biomass), .groups = "drop")
+      })
     }
   ),
-  
+
+  # functional group richness by focal group (graminoids, forbs, bryophytes)
   tar_target(
-    name = fg_richness_G_tidy,
-    command = clean_model_terms(tidy_model(fg_richness_analysis$model_2way))
+    name = fg_richness_focal_analysis,
+    command = {
+      split_data <- split(standing_biomass_by_focal_fg, standing_biomass_by_focal_fg$focal_fg)
+      purrr::imap(split_data, function(dat, fg) {
+        compare_full_vs_2way_lmer(
+          data = dat,
+          response = "standing_biomass",
+          predictor = "fg_richness"
+        )
+      })
+    }
   ),
+
+  tar_target(
+    name = fg_richness_focal_tidy,
+    command = {
+      purrr::imap(fg_richness_focal_analysis, function(res, fg) {
+        clean_model_terms(tidy_model(res$model_2way))
+      })
+    }
+  ),
+
+  
 
   # functional group identity
   tar_target(
