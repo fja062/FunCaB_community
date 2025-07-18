@@ -42,10 +42,12 @@ figure_plan <- list(
     }
   ),
 
-  # tar_target(
-  #   name = fig_fg_richness_G_effects,
-  #   command = plot_model_effects(fg_richness_G_analysis$model_2way)
-  # ),
+  ## Part 2
+
+  tar_target(
+    name = fig_fg_richness_focal_effects,
+    command = plot_tidy_effects_facet(fg_richness_focal_tidy, "focal_fg")
+  ),
 
   tar_target(
     name = fig_fg_identity_G_effects,
