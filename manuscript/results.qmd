@@ -71,3 +71,19 @@ if (!exists("fig_fg_identity_interactions")) tar_load(fig_fg_identity_interactio
 # Display plot
 fig_fg_identity_interactions
 ```
+
+### Functional group biomass
+
+```{r}
+#| label: fig-fg-biomass-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of functional group biomass on standing biomass. The model coefficients with confidence intervals for functional group biomass, precipitation, and temperature and their interactions are shown."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_fg_biomass_effects")) tar_load(fig_fg_biomass_effects)
+
+# Display plot
+fig_fg_biomass_effects
+```
