@@ -13,7 +13,9 @@ library(gt)
 
 ## Results
 
-### PART 1: Functional group richness effect
+### PART 1: General models
+
+### Functional group richness effect
 
 Test overall effects of number of functional groups (functional group richness) on standing biomass across the climate grid.
 
@@ -112,4 +114,64 @@ fig_fg_biomass_interactions
 if (!exists("fg_biomass_tidy")) tar_load(fg_biomass_tidy)
 
 pretty_model_table(fg_biomass_tidy)
+```
+
+### Part 2: Single group effects
+
+## Graminoids only
+
+### Functional group richness effect (Graminoids only)
+
+```{r}
+#| label: fig-fg-richness-G-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups (graminoids only) on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_fg_richness_G_effects")) tar_load(fig_fg_richness_G_effects)
+
+# Display plot
+fig_fg_richness_G_effects
+```
+
+```{r}
+#| label: fg-richness-G-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_richness_G
+if (!exists("fg_richness_G_tidy")) tar_load(fg_richness_G_tidy)
+
+pretty_model_table(fg_richness_G_tidy)
+```
+
+### Functional group identity effect (Graminoids only)
+
+```{r}
+#| label: fig-fg-identity-G-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of functional group identity (graminoids only) on standing biomass. The model coefficients with confidence intervals for functional group identity, precipitation, and temperature and their interactions are shown."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_fg_identity_G_effects")) tar_load(fig_fg_identity_G_effects)
+
+# Display plot
+fig_fg_identity_G_effects
+```
+
+```{r}
+#| label: fg-identity-G-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_identity_G
+if (!exists("fg_identity_G_tidy")) tar_load(fg_identity_G_tidy)
+
+pretty_model_table(fg_identity_G_tidy)
 ```

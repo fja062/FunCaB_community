@@ -109,6 +109,7 @@ analysis_plan <- list(
       )
     }
   ),
+  
   tar_target(
     name = fg_richness_G_tidy,
     command = clean_model_terms(tidy_model(fg_richness_analysis$model_2way))
