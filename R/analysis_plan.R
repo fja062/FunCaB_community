@@ -39,7 +39,6 @@ analysis_plan <- list(
       )
     }
   ),
-
   tar_target(
     name = fg_identity_tidy,
     command = clean_model_terms(tidy_model(fg_identity_analysis$model_2way))
@@ -50,20 +49,22 @@ analysis_plan <- list(
     name = fg_biomass_analysis,
     command = {
       # merge cumulative removed biomass with standing biomass
-      dat <- sb_long |> 
-        tidylog::left_join(crb_long, 
-          by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")) |> 
-          mutate(fg_removed = factor(fg_removed, 
-             levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB"))) |>
-          mutate(standing_biomass_log = log(standing_biomass + 1))
+      dat <- sb_long |>
+        tidylog::left_join(crb_long,
+          by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")
+        ) |>
+        mutate(fg_removed = factor(fg_removed,
+          levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")
+        )) |>
+        mutate(standing_biomass_log = log(standing_biomass + 1))
 
       ### SHITY MODEL, ASSUMPTIONS NOT MET!!!
       # full model
-      fit <- lmerTest::lmer(standing_biomass_log ~ cumulative_removed_biomass * fg_removed * temperature_scaled * precipitation_scaled + (1|siteID), data = dat)
+      fit <- lmerTest::lmer(standing_biomass_log ~ cumulative_removed_biomass * fg_removed * temperature_scaled * precipitation_scaled + (1 | siteID), data = dat)
       # simpler model
-      fit2 <- lmerTest::lmer(standing_biomass_log ~ cumulative_removed_biomass + fg_removed + temperature_scaled + precipitation_scaled + cumulative_removed_biomass:fg_removed + cumulative_removed_biomass * temperature_scaled * precipitation_scaled + fg_removed * temperature_scaled * precipitation_scaled + (1|siteID), data = dat)
-      #anova(fit, fit2)
-      
+      fit2 <- lmerTest::lmer(standing_biomass_log ~ cumulative_removed_biomass + fg_removed + temperature_scaled + precipitation_scaled + cumulative_removed_biomass:fg_removed + cumulative_removed_biomass * temperature_scaled * precipitation_scaled + fg_removed * temperature_scaled * precipitation_scaled + (1 | siteID), data = dat)
+      # anova(fit, fit2)
+
 
       # make function for more than 3 way interactions?
       # # compare full vs 2-way model
@@ -74,7 +75,6 @@ analysis_plan <- list(
       # )
     }
   ),
-
   tar_target(
     name = fg_biomass_tidy,
     command = clean_model_terms(tidy_model(fg_biomass_analysis))
@@ -84,9 +84,66 @@ analysis_plan <- list(
   tar_target(
     name = community_pca,
     command = make_sp_pca(cover_data)
+  ),
+
+
+  # PART 2: Single group effects
+  # Graminoids present
+
+  # functional group richness
+  tar_target(
+    name = fg_richness_G_analysis,
+    command = {
+      # prepare data
+      dat <- standing_biomass_22 |>
+        filter(str_detect(fg_remaining, "G")) |>
+        # sum biomass by fg_removed and remaining
+        group_by(siteID, blockID, plotID, fg_removed, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
+        summarise(standing_biomass = sum(biomass), .groups = "drop")
+
+      # compare full vs 2-way model
+      results <- compare_full_vs_2way_lmer(
+        data = dat,
+        response = "standing_biomass",
+        predictor = "fg_richness"
+      )
+    }
+  ),
+  tar_target(
+    name = fg_richness_G_tidy,
+    command = clean_model_terms(tidy_model(fg_richness_analysis$model_2way))
+  ),
+
+  # functional group identity
+  tar_target(
+    name = fg_identity_G_analysis,
+    command = {
+      # compare full vs 2-way model
+      results <- compare_full_vs_2way_lmer(
+        data = standing_biomass_22 |>
+          filter(str_detect(fg_remaining, "G")),
+        response = "biomass",
+        predictor = "fg_removed"
+      )
+    }
+  ),
+
+  tar_target(
+    name = fg_identity_G_tidy,
+    command = clean_model_terms(tidy_model(fg_identity_G_analysis$model_2way))
   )
 
-
+  # tar_target(
+  #   name = fg_biomass_analysis,
+  #   command = {
+  #     # merge cumulative removed biomass with standing biomass
+  #     dat <- sb_long |>
+  #       tidylog::left_join(crb_long,
+  #         by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")) |>
+  #         mutate(fg_removed = factor(fg_removed,
+  #            levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB"))) |>
+  #         mutate(standing_biomass_log = log(standing_biomass + 1))
+  # )
 
   # 1. Effect of remaining/removed biomass on biomass of focal PFG
   # Single FG presence:
@@ -157,71 +214,4 @@ analysis_plan <- list(
   #   }
   # ),
 
-
-
-  # Multiple FG presence:
-  # gb ~ b sb * f crb
-  # gb ~ g sb * f crb
-  # gf ~ f sb * b crb
-  # gf ~ g sb * b crb
-  # fb ~ b sb * g crb
-  # fb ~ f sb * g crb
-
-  # fgb(c) ~ b sb * f sb
-  # fgb(c) ~ g sb * f sb
-  # fgb(c) ~ b sb * g sb
-
-  # tar_target(
-  #   name = multiple_fg_model,
-  #   command = {
-  #     # two fg present
-  #     GB <- analysis_data |>
-  #       filter(
-  #         fg_remaining == "GB",
-  #         functional_group != "forbs",
-  #         year != "2015"
-  #       ) |>
-  #       select(year, siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, functional_group, standing_biomass_calculated, cum_removed_biomass, temperature_level, precipitation_level) |>
-  #       pivot_wider(names_from = functional_group, values_from = standing_biomass_calculated, names_prefix = "sb_")
-
-  #     # gb ~ b sb * f crb
-  #     # fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * cum_removed_biomass * precipitation + year + (1 | siteID), data = GB)
-  #     # summary(fit)
-
-  #     # # gb ~ g sb * f crb
-  #     # fit <- lmerTest::lmer(sb_bryophytes ~ sb_graminoids * cum_removed_biomass + (1 | siteID), data = GB)
-
-
-
-  #     # three fg present
-  #     # FGB <- analysis_data |>
-  #     #   filter(fg_remaining == "FGB") |>
-  #     #   select(siteID, blockID, plotID, fg_removed, fg_remaining, removed_fg, functional_group, standing_biomass_19, cum_removed_biomass, temperature_level, precipitation_level) |>
-  #     #   pivot_wider(names_from = functional_group, values_from = standing_biomass_19, names_prefix = "sb_") %>%
-  #     #   make_fancy_data(., gridded_climate, fix_treatment = FALSE)
-
-  #     # #fgb(c) ~ b sb * f sb
-  #     # fit <- lmerTest::lmer(sb_graminoids ~ sb_bryophytes * sb_forbs + (1|siteID), data = FGB)
-  #     # summary(fit)
-  #   }
-  # )
-
-
-
-  # 2. Effect of remaining/removed biomass on richness/evenness/diversity/traits of focal PFG
-  # Single FG presence (2019):
-  #  g ~ b crb * f crb
-  # f ~ b crb * g crb
-  # OR
-  # ∂g ~ b crb * f crb
-  # ∂f ~ b crb * g crb
-
-  # Multiple FG presence:
-  #  gb ~ b sb * f crb
-  # gf ~ f sb * b crb
-  # gf ~ g sb * b crb
-  # fb ~ b sb * g crb
-
-  # fgb(c) ~ b sb * f sb
-  # fgb(c) ~ b sb * g sb
 )
