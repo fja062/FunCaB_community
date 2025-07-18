@@ -2,6 +2,11 @@
 figure_plan <- list(
 
   tar_target(
+    name = fig_pca,
+    command = make_sp_pca_figure(community_pca)
+  ),
+
+  tar_target(
     name = fig_fg_richness_effects,
     command = plot_model_effects(fg_richness_analysis$model_2way)
   ),
@@ -19,6 +24,11 @@ figure_plan <- list(
 
       p1 + p2 +plot_layout(guides = "collect") & theme_bw()
     }
+  ),
+
+  tar_target(
+    name = fig_fg_biomass_effects,
+    command = plot_model_effects(fg_biomass_analysis)
   )
 
 

@@ -11,15 +11,14 @@ make_sp_pca_figure <- function(community_pca){
     select(label, length)
 
   community_pca[[1]] |>
-    #mutate(Treatment = recode(Treatment, CTL = "Control", OTC = "Warming")) |>
-    ggplot(aes(x = PC1, y = PC2, colour = treatment)) +
+    ggplot(aes(x = PC1, y = PC2, colour = fg_removed)) +
     # ## arrows
     # geom_segment(data = pca_sp[[2]], aes(x = 0, y = 0, xend = PC1, yend = PC2),
     #              arrow=arrow(length=unit(0.2,"cm")),
     #              alpha = 0.75, color = 'grey70') +
     # points and path
     geom_point(aes(size = ifelse(year == min(as.numeric(year)), "First", "Other"))) +
-    geom_path(aes(linetype = treatment, group = plotID)) +
+    geom_path(aes(linetype = fg_removed, group = plotID)) +
     coord_equal() +
     scale_size_discrete(name = "Year", range = c(0.5, 2), limits = c("Other", "First"), breaks = c("First", "Other")) +
     # scale_linetype_manual(values = c("dashed", "solid")) +

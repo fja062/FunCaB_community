@@ -18,13 +18,14 @@ make_sp_pca <- function(cover_data){
     filter(!is.na(cover)) |>
     select(-functional_group) |>
     mutate(cover = sqrt(cover)) |>
+    tidylog::distinct() |> 
     pivot_wider(names_from = species, values_from = cover, values_fill = 0)
 
   comm_sp <- comm_wide |>
-    select(-c(year:precipitation_level))
+    select(-c(year:fg_remaining))
 
   comm_info <- comm_wide |>
-    select(c(year:precipitation_level))
+    select(c(year:fg_remaining))
 
 
   # make pca
