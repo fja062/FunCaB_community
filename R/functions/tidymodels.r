@@ -320,3 +320,31 @@ pretty_model_table <- function(df) {
     )
 }
 
+#' Plot tidy model effects with faceting and CI significance
+#' @param data A tidy model output data frame (with columns: term, estimate, std.error, ...)
+#' @param facet_var The column name (string) to facet by (e.g., 'focal_fg')
+#' @return A ggplot object with effect sizes, faceted by the given variable, and point style by CI crossing zero
+plot_tidy_effects_facet <- function(data, facet_var) {
+  # Reverse order so single effects are on top
+  desired_order <- rev(c("fg_richness", "T", "P", "fg_richness:T", "fg_richness:P", "P:T"))
+  data <- data %>%
+    dplyr::mutate(
+      ci_lower = estimate - std.error,
+      ci_upper = estimate + std.error,
+      sig_point = ifelse(ci_lower > 0 | ci_upper < 0, "solid", "open"),
+      term = factor(term, levels = desired_order)
+    )
+  ggplot(data %>% dplyr::filter(term != "(Intercept)"),
+         aes(x = term, y = estimate, ymin = ci_lower, ymax = ci_upper)) +
+    geom_pointrange(aes(shape = sig_point), fill = "white") +
+    scale_shape_manual(values = c(solid = 19, open = 21), guide = "none") +
+    facet_wrap(as.formula(paste("~", facet_var)), scales = "free_x") +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+    theme_bw() +
+    labs(
+      x = "Model term",
+      y = "Estimate (± SE)",
+      title = "Effect sizes by group"
+    ) +
+    coord_flip()
+}
