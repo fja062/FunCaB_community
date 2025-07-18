@@ -1,64 +1,67 @@
 # data analysis plan
 analysis_plan <- list(
 
-  ## PART 1: Effect of removed biomass on remaining biomass
+  ## PART 1: Effect of removed fg on standing biomass
 
+  # functional group richness
   tar_target(
     name = fg_richness_analysis,
     command = {
-
       # prepare data
-      dat <- biomass_22 |>
+      dat <- standing_biomass_22 |>
         # sum biomass by fg_removed and remaining
         group_by(siteID, blockID, plotID, fg_removed, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
-        summarise(standing_biomass = sum(biomass), .groups = "drop") |>
-        # bare ground plots need to stay, but biomass is 0
-        mutate(fg_status = if_else(fg_removed == "FGB", "remaining", fg_status),
-               standing_biomass = if_else(fg_removed == "FGB", 0, standing_biomass)) |> 
-        filter(fg_status == "remaining")
+        summarise(standing_biomass = sum(biomass), .groups = "drop")
 
       # compare full vs 2-way model
       results <- compare_full_vs_2way_lmer(
         data = dat,
-      response = "standing_biomass",
-      predictor = "fg_richness"
+        response = "standing_biomass",
+        predictor = "fg_richness"
       )
-
     }
   ),
-
-    tar_target(
+  tar_target(
     name = fg_richness_tidy,
     command = clean_model_terms(tidy_model(fg_richness_analysis$model_2way))
   ),
 
+  # functional group identity
   tar_target(
     name = fg_identity_analysis,
     command = {
-
-      # prepare data
-      dat <- biomass_22 |> 
-        # bare ground plots need to stay, but biomass is 0
-        mutate(fg_status = if_else(fg_removed == "FGB", "remaining", fg_status),
-               standing_biomass = if_else(fg_removed == "FGB", 0, biomass)) |> 
-        filter(fg_status == "remaining") |>
-        mutate(fg_removed = factor(fg_removed, levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")))
-
-      #dat |> distinct(fg_removed, removed_fg, fg_remaining, fg_richness, fg_status)
-
       # compare full vs 2-way model
       results <- compare_full_vs_2way_lmer(
-        data = dat,
-      response = "standing_biomass",
-      predictor = "fg_removed"
+        data = standing_biomass_22,
+        response = "biomass",
+        # should this be fg_removed x fg_richness. Or should it be identidy (fg_removed) x removed_fg?
+        predictor = "fg_removed"
       )
-
     }
   ),
-
   tar_target(
     name = fg_identity_tidy,
     command = clean_model_terms(tidy_model(fg_identity_analysis$model_2way))
+  ),
+
+  # functional group biomass
+  tar_target(
+    name = fg_biomass_analysis,
+    command = {
+      # merge cumulative removed biomass with standing biomass
+      dat <- sb_long |> 
+        tidylog::left_join(crb_long, 
+          by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled"))
+
+      # lmerTest::lmer()
+
+      # # compare full vs 2-way model
+      # results <- compare_full_vs_2way_lmer(
+      #   data = dat,
+      #   response = "standing_biomass",
+      #   predictor = "biomass"
+      # )
+    }
   )
 
 
