@@ -42,10 +42,10 @@ figure_plan <- list(
     }
   ),
 
-  tar_target(
-    name = fig_fg_richness_G_effects,
-    command = plot_model_effects(fg_richness_G_analysis$model_2way)
-  ),
+  # tar_target(
+  #   name = fig_fg_richness_G_effects,
+  #   command = plot_model_effects(fg_richness_G_analysis$model_2way)
+  # ),
 
   tar_target(
     name = fig_fg_identity_G_effects,
