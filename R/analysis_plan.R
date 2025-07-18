@@ -123,13 +123,12 @@ analysis_plan <- list(
   tar_target(
     name = fg_richness_focal_tidy,
     command = {
-      purrr::imap(fg_richness_focal_analysis, function(res, fg) {
-        clean_model_terms(tidy_model(res$model_2way))
+      purrr::imap_dfr(fg_richness_focal_analysis, function(res, fg) {
+        clean_model_terms(tidy_model(res$model_2way)) %>%
+          dplyr::mutate(focal_fg = fg)
       })
     }
   ),
-
-  
 
   # functional group identity
   tar_target(
