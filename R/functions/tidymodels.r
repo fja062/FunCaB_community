@@ -298,26 +298,39 @@ clean_model_terms <- function(tidy_df) {
   return(df)
 }
 
-#' Create a pretty gt table from cleaned model output
+#' Create a pretty gt table from cleaned model output, with optional grouping
 #' @param df A cleaned tidy model output data frame (from clean_model_terms)
-#' @return A gt table with rounded numbers and bold significant p-values
-pretty_model_table <- function(df) {
-  library(gt)
-  df |>
+#' @param group_var Optional string: column name to group the gt table by (e.g., 'focal_fg'). Default: NULL
+#' @return A gt table with rounded numbers and bold significant p-values, optionally grouped
+pretty_model_table <- function(df, group_var = NULL) {
+  df <- df |>
     dplyr::select(-signif) |>
     dplyr::mutate(
       estimate = round(estimate, 2),
       std.error = round(std.error, 2),
       p.value = round(p.value, 3)
-    ) |>
-    gt::gt() |>
-    gt::tab_style(
-      style = gt::cell_text(weight = "bold"),
-      locations = gt::cells_body(
-        columns = c(estimate, std.error, p.value),
-        rows = p.value < 0.05
-      )
     )
+  if (!is.null(group_var)) {
+    df |>
+      gt::gt(groupname_col = group_var) |>
+      gt::tab_style(
+        style = gt::cell_text(weight = "bold"),
+        locations = gt::cells_body(
+          columns = c(estimate, std.error, p.value),
+          rows = p.value < 0.05
+        )
+      )
+  } else {
+    df |>
+      gt::gt() |>
+      gt::tab_style(
+        style = gt::cell_text(weight = "bold"),
+        locations = gt::cells_body(
+          columns = c(estimate, std.error, p.value),
+          rows = p.value < 0.05
+        )
+      )
+  }
 }
 
 #' Plot tidy model effects with faceting and CI significance
