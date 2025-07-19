@@ -344,7 +344,7 @@ plot_tidy_effects_facet <- function(data, facet_var) {
     dplyr::mutate(
       ci_lower = estimate - std.error,
       ci_upper = estimate + std.error,
-      sig_point = ifelse(ci_lower > 0 | ci_upper < 0, "solid", "open"),
+      sig_point = ifelse(p.value < 0.05, "solid", "open"),
       term = factor(term, levels = desired_order)
     )
   ggplot(data %>% dplyr::filter(term != "(Intercept)"),
