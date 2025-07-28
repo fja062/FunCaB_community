@@ -1,6 +1,6 @@
-------------------------------------------------------------------------
-
-------------------------------------------------------------------------
+---
+editor: visual
+---
 
 ```{r}
 #| label: set-up-methods
@@ -14,30 +14,34 @@ library(tarchetypes)
 
 ### Study Sites
 
-The experiment was conducted across the Vestland Climate Grid (VCG) in Western Norway, spanning boreal and alpine regions. The VCG encompasses 12 sites distributed along environmental gradients, with growing season temperatures ranging from 6.5°C to 10.5°C and mean annual precipitation varying from 600 mm to 2600 mm. Sites were selected to represent the full range of climatic conditions found in the region, from lowland boreal forests to high alpine tundra.
-
-Each site was chosen to represent a distinct climatic zone within the gradient, with sites positioned at different elevations and distances from the coast. The sites vary in vegetation composition, from species-rich alpine grasslands to more species-poor boreal communities. All sites are characterized by semi-natural grasslands that have been maintained through traditional land use practices, primarily grazing and hay cutting.
+The experiment was conducted at twelve semi-natural grassland sites in the Vestland Climate Grid (VCG) in south-western Norway. The sites were selected along three temperature (boreal, sub-alpine, and alpine) and four precipitation levels. The gradients ranged from 6.5°C to 10.5°C growing season temperatures and mean annual precipitation varying from 600 mm to 2600 mm. Apart from differing in mean growing season temperature and annual precipitation, the sites were selected to be as similar as possible in grazing regime and history, bedrock, vegetation type and structure, slope and exposure. For more details on the study site and experimental design see @vandvik2022role.
 
 ### Experimental Design
 
-The experiment employed a fully factorial design to assess the effects of plant functional group removals on community composition and ecosystem processes. Three plant functional groups were targeted for removal: graminoids (grasses and sedges), forbs (herbaceous dicots), and bryophytes (mosses and liverworts). The factorial design included all possible combinations of functional group removals, resulting in eight treatment combinations: control (no removals), three single functional group removals, three pairwise removals, and complete removal of all three functional groups.
+To assess the effects of plant functional group removals on standing biomass and community composition, we set up a fully factorial plant functional group removal experiment in 2015. We focused on the dominant plant functional groups including graminoids (G; grasses, sedges, and rushes), forbs (F; including herbaceous forbs, pteridophytes, dwarf-shrubs, and small individuals of trees and shrubs), and bryophytes (B; including mosses, liverworts, and hornworts). At each site, eight 25 x 25 cm plots were established and replicated four times (32 plots per site and n = 384 plots in total). Within each block we randomly assigned the removal treatments of the three plant functional groups and all possible combination resulting in eight treatments: control (intact vegetation), three single functional group removals, three pairwise removals, and complete removal of all three functional groups (bare ground; Figure).
 
-At each of the 12 sites, the experiment was established in a randomized block design. Each site contained four blocks, with eight plots per block, totaling 32 plots per site and 384 plots across all sites. Plots measured 2m × 2m and were positioned within each block to minimize environmental heterogeneity. Within each block, the eight treatment combinations were randomly assigned to plots.
-
-Treatment application began in [YEAR] and was maintained annually throughout the experimental period. Functional group removals were conducted by carefully hand-pulling or cutting all individuals of the target functional group, taking care to minimize disturbance to the remaining vegetation and soil. Removals were performed at the beginning of each growing season and repeated as necessary throughout the season to prevent regrowth. The experimental design allows for the assessment of both individual functional group effects and their interactions on community composition and ecosystem processes.
+The removals were done annually at peak growing season between 2015 and 2022. In 2016 and 2017, the removals were done twice, including a removal in the spring. The above ground biomass of the relevant plant functional group(s) were removed. The below ground biomass, litter and lichens were left intact.
 
 ### Data Collection
 
-#### Biomass Data
+#### Above ground biomass (removed and remaining)
 
-Biomass data were collected annually from all experimental plots. Functional group biomass was measured by harvesting all aboveground biomass within each plot, separating by functional group (graminoids, forbs, bryophytes), and weighing after drying to constant mass at 60°C. In addition to functional group-level measurements, individual species biomass was recorded for 360 species-level records, providing detailed information on species-specific responses to the removal treatments.
+Above ground biomass was collected annually from all experimental plots. The biomass was harvested for each plot, separating each functional group (graminoids, forbs, bryophytes), drying it to constant mass at 60°C and weighing.
 
-#### Plant Community Data
+In 2022, the whole experiment was harvested and the above ground biomass from all plant functional groups in all plots was removed. The biomass was also dried at 60°C and weighed. The biomass from the plant functional groups from the removal treatments is hereafter called *removed biomass*. And the biomass from the remaining plant functional groups is hereafter called *standing biomass*.
 
-Plant community composition was assessed through systematic vegetation surveys conducted across all experimental plots. The dataset includes 17,181 plant records covering 206 taxa, with data collected on species presence, abundance, and cover. Community surveys were conducted using standardized protocols to ensure consistency across sites and years.
+#### Plant Community Composition
 
-The plant community data capture both the immediate effects of functional group removals and the longer-term community responses, including potential compensatory responses by remaining functional groups and recruitment of new species.
+Plant community composition recorded annually between 2015 and 2019 across all experimental plots. We recorded the presence and visually estimated the cover of each species per plot.
 
 ### Analysis
 
-*[Analysis section to be developed]*
+-   Calculate cumulative removed biomass per treatment and functional group
+
+-   Calculate diversity indices
+
+-   Part 1: run models across all data. Test how the number of removed functional groups, identity of removed groups, or cumulative removed biomass of each functional group affected standing biomass. We ran lmer with standing biomass as response and fg, plus temperature and precipitation as predictors. Site was used as random effect. Temperature and precipitation were scaled.
+
+-   We ran the same analysis for each functional group separate (e.g. plots were graminoids present, FB, B, none)
+
+-   Something with diversity

@@ -26,7 +26,7 @@ make_fancy_data <- function(data, gridded_climate, fix_treatment = TRUE){
       mutate(fg_remaining = case_when(
       treatment == "C" ~ "FGB",
       treatment == "FB" ~ "G",
-      treatment == "FGB" ~ "bare",
+      treatment == "FGB" ~ "none",
       treatment == "GB" ~ "F",
       treatment == "F" ~ "GB",
       treatment == "GF" ~ "B",
@@ -34,7 +34,13 @@ make_fancy_data <- function(data, gridded_climate, fix_treatment = TRUE){
       treatment == "G" ~ "FB",
       treatment == "XC" ~ "FGB",
       TRUE ~ NA_character_)) |>
-      rename(fg_removed = treatment)
+      rename(fg_removed = treatment) |>
+      mutate(fg_removed = if_else(fg_removed == "C", "none", fg_removed)) |>
+      # add number of functional groups
+      mutate(fg_richness = case_when(fg_removed == "none" ~ 3,
+                                             fg_removed %in% c("F", "G", "B") ~ 2,
+                                             fg_removed %in% c("FB", "GF", "GB") ~ 1,
+                                             fg_removed == "FGB" ~ 0))
 
   } else {
     data2 <- data2

@@ -7,49 +7,183 @@ editor: visual
 #| echo: false
 library(targets)
 library(tarchetypes)
+library(gt)
 
 ```
 
 ## Results
 
-Here we can add figures, tables and results...
+### PART 1: General models
 
-### Functional Group Cover vs Removed Biomass
+### Functional group richness effect
+
+Test overall effects of number of functional groups (functional group richness) on standing biomass across the climate grid.
 
 ```{r}
-#| label: fig-fg-cover-biomass
-#| fig-cap: "Relationship between functional group cover and removed biomass. Left panel shows graminoid cover vs removed biomass for plots where graminoids were removed. Right panel shows forb cover vs removed biomass for plots where forbs were removed. Regression lines with 95% confidence intervals are shown."
+#| label: fig-fg-fichness-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
 #| echo: false
 #| warning: false
 #| message: false
 
 # Load the figure from targets
-tar_load(fg_cover_biomass_panels)
+tar_load(fig_fg_richness_effects)
 
-# Display the figure
-fg_cover_biomass_panels
+# Display plot
+fig_fg_richness_effects
 ```
 
-### Model Coefficients and Interactions for Graminoid-only Plots
-
 ```{r}
-#| label: fig-g-only-coeffs-interactions
-#| fig-cap: "Model results for graminoid-only plots. (a) Estimated coefficients from the mixed model. (b) Predicted interaction effects between precipitation and crb_B."
+#| label: fg-richness-tidy-table
 #| echo: false
 #| warning: false
 #| message: false
 
-# Load required libraries
-library(ggplot2)
-library(patchwork)
-library(sjPlot)
-library(targets)
+# Load the tidy model output for fg_richness
+if (!exists("fg_richness_tidy")) tar_load(fg_richness_tidy)
 
-# Load the figures from targets
-tar_load(G_only_coeffs)
-tar_load(G_only_interactions)
+pretty_model_table(fg_richness_tidy)
 
-# Combine the two plots and label as a and b
-(G_only_coeffs + G_only_interactions) +
-  plot_annotation(tag_levels = 'a')
+```
+
+### Functional group identity effects
+
+```{r}
+#| label: fg-identity-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_identity
+if (!exists("fg_identity_tidy")) tar_load(fg_identity_tidy)
+
+pretty_model_table(fg_identity_tidy)
+```
+
+```{r}
+#| label: fig-fg-identity-interactions
+#| fig-cap: "Interaction effects from the mixed-effects model for functional group identity on standing biomass. The plot displays estimated interaction effects between functional group identity and environmental variables."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_fg_identity_interactions")) tar_load(fig_fg_identity_interactions)
+
+# Display plot
+fig_fg_identity_interactions
+```
+
+### Functional group biomass
+
+```{r}
+#| label: fig-fg-biomass-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of functional group biomass on standing biomass. The model coefficients with confidence intervals for functional group biomass, precipitation, and temperature and their interactions are shown."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_fg_biomass_effects")) tar_load(fig_fg_biomass_effects)
+
+# Display plot
+fig_fg_biomass_effects
+```
+
+```{r}
+#| label: fig-fg-biomass-interactions
+#| fig-cap: "Interaction effects from the mixed-effects model for functional group biomass on standing biomass. The plot displays estimated interaction effects between functional group biomass and environmental variables."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_fg_biomass_interactions")) tar_load(fig_fg_biomass_interactions)
+
+# Display plot
+fig_fg_biomass_interactions
+```
+
+```{r}
+#| label: fg-biomass-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_biomass
+if (!exists("fg_biomass_tidy")) tar_load(fg_biomass_tidy)
+
+pretty_model_table(fg_biomass_tidy)
+```
+
+### Part 2: Focal functional group effects
+
+### Functional group richness effect
+
+```{r}
+#| label: fig-fg-richness-focal-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups removed on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+tar_load(fig_fg_richness_focal_effects)
+
+# Display plot
+fig_fg_richness_focal_effects
+```
+
+```{r}
+#| label: fg-richness-focal-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_richness_G
+tar_load(fg_richness_focal_tidy)
+
+pretty_model_table(fg_richness_focal_tidy, group_var = "focal_fg")
+```
+
+### Functional group identity effect
+
+```{r}
+#| label: fig-fg-identity-focal-effects
+#| fig-cap: "Estimated effects from the mixed-effects model of functional group identity (graminoids only) on standing biomass. The model coefficients with confidence intervals for functional group identity, precipitation, and temperature and their interactions are shown."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+tar_load(fig_fg_identity_focal_effects)
+
+# Display plot
+fig_fg_identity_focal_effects
+```
+
+```{r}
+#| label: fg-identity-focal-tidy-table
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the tidy model output for fg_identity_G
+tar_load(fg_identity_focal_tidy)
+
+pretty_model_table(fg_identity_focal_tidy)
+```
+
+```{r}
+#| label: fig-fg-identity-focal-interactions
+#| fig-cap: "Interaction effects from the mixed-effects model for functional group identity (graminoids only) on standing biomass. The plot displays estimated interaction effects between functional group identity and environmental variables."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+tar_load(fig_fg_identity_focal_interactions)
+
+# Display plot
+fig_fg_identity_focal_interactions
 ```

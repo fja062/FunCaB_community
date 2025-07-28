@@ -6,31 +6,35 @@ transformation_plan <- list(
     name = gridded_climate,
     command = {
       dat <- gridded_climate_raw |>
-      filter(variable %in% c("temperature", "precipitation"),
-              year(date) %in% c(2008:2019)) |>
-      pivot_wider(names_from = variable, values_from = value) |>
-      mutate(year = year(date))
+        filter(
+          variable %in% c("temperature", "precipitation"),
+          year(date) %in% c(2008:2019)
+        ) |>
+        pivot_wider(names_from = variable, values_from = value) |>
+        mutate(year = year(date))
 
-      left_join(dat |>
-        group_by(year, siteID) |>
-        summarise(precipitation = sum(precipitation, na.rm = TRUE)) |>
-        ungroup() |>
-        group_by(siteID) |>
-        summarise(precipitation = mean(precipitation, na.rm = TRUE)),
-      dat |>
-        mutate(month = month(date)) |>
-        filter(month %in% c(6, 7, 8)) |>
-        group_by(year, month, siteID) |>
-        summarise(temperature = mean(temperature)) |>
-        ungroup() |>
-        group_by(siteID) |>
-        summarise(temperature = mean(temperature)),
-    by = "siteID")
-
+      left_join(
+        dat |>
+          group_by(year, siteID) |>
+          summarise(precipitation = sum(precipitation, na.rm = TRUE)) |>
+          ungroup() |>
+          group_by(siteID) |>
+          summarise(precipitation = mean(precipitation, na.rm = TRUE)),
+        dat |>
+          mutate(month = month(date)) |>
+          filter(month %in% c(6, 7, 8)) |>
+          group_by(year, month, siteID) |>
+          summarise(temperature = mean(temperature)) |>
+          ungroup() |>
+          group_by(siteID) |>
+          summarise(temperature = mean(temperature)),
+        by = "siteID"
+      )
     }
   ),
 
   # prep biomass
+  # 2015-2021
   tar_target(
     name = biomass,
     command = removed_biomass_raw |>
@@ -38,40 +42,69 @@ transformation_plan <- list(
       clean_ovstedalen_2018_duplicates() |>
       mutate(plotID = if_else(
         treatment == "GF" & str_detect(plotID, "FG"),
-          str_replace(plotID, "FG", "GF"),
-          plotID)) %>%
+        str_replace(plotID, "FG", "GF"),
+        plotID
+      )) |>
+      # remove extra plots in 2016
+      filter(treatment != "XC") %>%
       # fix blockID
       funcabization(., convert_to = "Funder") %>%
-      make_fancy_data(., gridded_climate, fix_treatment = TRUE)
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
+      # remove invalid removed_fg rows
+      remove_invalid_removed_fg_rows() |>
+      mutate(
+        fg_status = "removed",
+        # scale precipitation and temperature
+        precipitation_scaled = precipitation / 1000,
+        temperature_scaled = temperature / 10
+      )
   ),
 
-  # sum biomass between 2015 and 2019 (without XC)
+  # prep biomass (2022 only)
   tar_target(
-    name = removed_biomass,
-    command = biomass |>
-      # remove extra plots in 2016
-      filter(fg_removed != "XC") |>
-      # remove 2020 data |>
-      filter(year < 2020) |>
+    name = biomass_22,
+    command = removed_biomass_final_raw %>%
+      # convert to Funder format
+      funcabization(., convert_to = "Funder") %>%
+      make_fancy_data(., gridded_climate, fix_treatment = TRUE) |>
+      # remove litter
+      filter(removed_fg != "L") |>
+      # annotate 2022 fg status
+      annotate_2022_fg_status() |>
+      select(-no_treatment) |>
+      # scale precipitation and temperature
+      mutate(
+        precipitation_scaled = precipitation / 1000,
+        temperature_scaled = temperature / 10
+      )
+  ),
+
+  # prep standing biomass 2022 (contains reminaing biomass)
+  tar_target(
+    name = standing_biomass_22,
+    command = biomass_22 |>
+      filter(fg_status == "remaining" | fg_removed == "FGB") |>
+      mutate(biomass = if_else(fg_removed == "FGB", 0, biomass)) |>
+      mutate(fg_removed = factor(fg_removed, 
+             levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")))
+  ),
+
+  # sum biomass between 2015 and 2022 (without XC)
+  tar_target(
+    name = cumulative_removed_biomass,
+    command = biomass |> 
       # remove mistakenly cut forb biomass from Ovs1B in 2019
-      filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
+      # MADE A FUNCTION THAT REMOVES THIS. SHOULD REMOVED_FG == B ALSO BE REMOVED?
+      # filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
+      # add 2022 data (only removed biomass)
+      bind_rows(biomass_22 |> 
+        filter(fg_status == "removed" | fg_removed == "none") |>
+        mutate(biomass = if_else(fg_removed == "FGB", 0, biomass))) |>
       # sum biomass across years
-      group_by(siteID, temperature_level, precipitation_level, blockID, plotID, fg_removed, removed_fg) |>
-      summarise(removed_biomass = sum(biomass)) |>
+      group_by(siteID, blockID, plotID, fg_removed, removed_fg, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
+      summarise(cumulative_removed_biomass = sum(biomass)) |>
       ungroup()
   ),
-
-
-  # standing biomass for 2016 controls
-  ### PROBLEM WITH THIS DATA, ONE DUPLICATE???
-  tar_target(
-    name = standing_biomass,
-    command = biomass |>
-      # control plots in 2016
-      filter(fg_removed == "XC") |>
-      rename(standing_biomass = biomass)
-  ),
-
 
   # make community data, impute missing cover values, construct FG cover coefficients
   tar_target(
@@ -89,144 +122,138 @@ transformation_plan <- list(
       filter(fg_removed != "XC") |>
       select(year:fg_removed, species, cover, functional_group, temperature_level:fg_remaining)
   ),
-
-tar_target(
-  name = fg_cover,
-  command = community |>
-    # remove extra plots in 2016
-    filter(fg_removed != "XC") |>
-    select(year:fg_removed, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
-    tidylog::distinct() |>
-    #remove duplicates
-    dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, fg_removed)) |>
-    tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
-    # remove last duplicate
-    filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2))
-
-),
-
-  #merge biomass with community
   tar_target(
-    name = remaining_biomass_merged,
-    command = merge_community_biomass(community, standing_biomass)
+    name = fg_cover,
+    command = community |>
+      # remove extra plots in 2016
+      filter(fg_removed != "XC") |>
+      select(year:fg_removed, vegetation_height, moss_height, total_graminoids, total_forbs, total_bryophytes) |>
+      tidylog::distinct() |>
+      # remove duplicates
+      dplyr::mutate(n = dplyr::n(), .by = c(year, siteID, blockID, plotID, removal, fg_removed)) |>
+      tidylog::filter(!c(n == 2 & is.na(total_graminoids))) |>
+      # remove last duplicate
+      filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2))
   ),
 
-  # combine fg_cover with removed_biomass
+  # #merge biomass with community
+  # tar_target(
+  #   name = remaining_biomass_merged,
+  #   command = merge_community_biomass(community, standing_biomass)
+  # ),
+
+  # # combine fg_cover with removed_biomass
+  # tar_target(
+  #   name = fg_cover_biomass,
+  #   command = fg_cover |>
+  #     # join with removed biomass by common identifiers
+  #     tidylog::left_join(removed_biomass,
+  #       by = join_by(siteID, blockID, plotID, fg_removed)) |>
+  #     # remove controls with missing biomass data
+  #     filter(!is.na(removed_biomass))
+  # ),
+
+  # # make biomass coefficients
+  # tar_target(
+  #   name = biomass_coefficients,
+  #   command = {
+  #     # get biomass coefficients
+  #     base <- make_biomass_coefficients(remaining_biomass_merged)
+  #     # get biomass in 2015
+  #     biomass_2015 <- base |>
+  #       filter(year == 2015) |>
+  #       select(plotID, biomass_2015 = standing_biomass_calculated)
+  #     # join 2015 biomass back to base
+  #     base |>
+  #       tidylog::left_join(biomass_2015, by = "plotID") |>
+  #       mutate(delta_biomass = standing_biomass_calculated - biomass_2015)
+  #   }
+  # ),
+
+  # calculate diversity metrics
   tar_target(
-    name = fg_cover_biomass,
-    command = fg_cover |>
-      # join with removed biomass by common identifiers
-      tidylog::left_join(removed_biomass,
-        by = join_by(siteID, blockID, plotID, fg_removed)) |>
-      # remove controls with missing biomass data
-      filter(!is.na(removed_biomass))
+    name = diversity,
+    command = calc_diversity(cover_data)
   ),
 
-  # make biomass coefficients
   tar_target(
-    name = biomass_coefficients,
-    command = {
-      # get biomass coefficients
-      base <- make_biomass_coefficients(remaining_biomass_merged)
-      # get biomass in 2015
-      biomass_2015 <- base |>
-        filter(year == 2015) |>
-        select(plotID, biomass_2015 = standing_biomass_calculated)
-      # join 2015 biomass back to base
-      base |>
-        tidylog::left_join(biomass_2015, by = "plotID") |>
-        mutate(delta_biomass = standing_biomass_calculated - biomass_2015)
-    }
-  ),
-
-
-tar_target(
-  name = traits,
-  command = traits_raw |>
-    select(-date, -flag) |>
-
-    # log transform size traits
-    mutate(
-      value_trans = if_else(
-        trait %in% c(
-          "height",
-          "fresh_mass",
-          "dry_mass",
-          "leaf_area",
-          "leaf_thickness"
+    name = traits,
+    command = traits_raw |>
+      select(-date, -flag) |>
+      # log transform size traits
+      mutate(
+        value_trans = if_else(
+          trait %in% c(
+            "height",
+            "fresh_mass",
+            "dry_mass",
+            "leaf_area",
+            "leaf_thickness"
+          ),
+          true = suppressWarnings(log(value)), # suppress warnings from log(-value) in isotopes (these are calculated but not kept)
+          false = value
         ),
-      true = suppressWarnings(log(value)),# suppress warnings from log(-value) in isotopes (these are calculated but not kept)
-      false = value
-    ),
-    trait_trans = recode(
-      trait,
-        "height" = "height_log",
-        "fresh_mass" = "fresh_mass_log",
-        "dry_mass" = "dry_mass_log",
-        "leaf_area" = "leaf_area_log",
-        "leaf_thickness" = "leaf_thickness_log"
-      ),
-    trait_trans = factor(trait_trans,
-      levels = c("height_log", "fresh_mass_log", "dry_mass_log", "leaf_area_log", "leaf_thickness_log", "SLA", "LDMC", "C", "N", "CN_ratio", "d13C", "d15N"))) %>%
-        make_fancy_data(., gridded_climate, fix_treatment = FALSE)
-
-),
-
-# bootstrapping
-# trait imputation
-tar_target(
-  name = imputed_traits,
-  command = make_trait_impute(cover_data, traits)
-),
-
-# bootstrapping for CWM
-tar_target(
-  name = trait_means,
-  command = make_bootstrapping(imputed_traits)
-),
-
-# join response and explanatory variables for analysis
-  tar_target(
-    name = analysis_data,
-    command = biomass_coefficients |>
-
-      # join with removed biomass
-      # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
-      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |>
-      # add missing blockID for control plots
-      mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
-      # rename to cumulative removed biomass
-      rename(cum_removed_biomass = removed_biomass) %>%
+        trait_trans = recode(
+          trait,
+          "height" = "height_log",
+          "fresh_mass" = "fresh_mass_log",
+          "dry_mass" = "dry_mass_log",
+          "leaf_area" = "leaf_area_log",
+          "leaf_thickness" = "leaf_thickness_log"
+        ),
+        trait_trans = factor(trait_trans,
+          levels = c("height_log", "fresh_mass_log", "dry_mass_log", "leaf_area_log", "leaf_thickness_log", "SLA", "LDMC", "C", "N", "CN_ratio", "d13C", "d15N")
+        )
+      ) %>%
       make_fancy_data(., gridded_climate, fix_treatment = FALSE)
-
-      # join with diversity
-      # tidylog::left_join(diversity |>
-      #   ungroup() |>
-      #   filter(year == 2019) |>
-      #   select(-year, -removal, -c(temperature_level:temperature)),
-      #     by = join_by(siteID, plotID, blockID, fg_removed, fg_remaining, functional_group))
-
   ),
 
-  # join response and explanatory variables for trait analysis
+  # bootstrapping
+  # trait imputation
   tar_target(
-    name = analysis_traits,
-    command = biomass_coefficients |>
-      # filter for only 2019 data
-      filter(year == 2019) |>
+    name = imputed_traits,
+    command = make_trait_impute(cover_data, traits)
+  ),
 
-      # join with removed biomass
-      # 147 biomass_coefficients plots do not join, because removed_biomass has no controls
-      # 5 plots from removed_biomass do no join, because they are missing in biomass_coefficients
-      tidylog::left_join(removed_biomass, by = join_by(siteID, plotID, fg_removed)) |>
-      # add missing blockID for control plots
-      mutate(blockID = if_else(is.na(blockID), str_sub(plotID, 1, 4), blockID)) |>
+  # bootstrapping for CWM
+  tar_target(
+    name = trait_means,
+    command = make_bootstrapping(imputed_traits)
+  ),
 
-      # join with traits
-      # WHY DO 720 NOT JOIN???!!!
-      tidylog::left_join(trait_means)
+  # analysis data
+  # standing biomass
+    tar_target(
+      name = sb_long,
+      command = standing_biomass_22 |> 
+        mutate(fg_status = "remaining") |>
+        select(-year, -removed_fg, -fg_status, -comments, -temperature, -precipitation) |>
+        rename(standing_biomass = biomass)
+    ),
 
-  )
+    tar_target(
+      name = sb_wide,
+      command = standing_biomass_22 |>
+        mutate(fg_status = "remaining") |>
+        select(-year, -fg_status, -comments, -temperature, -precipitation) |>
+        rename(standing_biomass = biomass) |>
+        pivot_wider(names_from = removed_fg, values_from = standing_biomass, names_prefix = "sb_")
+    ),
+
+    # cumulative removed biomass
+    tar_target(
+      name = crb_long,
+      command = cumulative_removed_biomass |> 
+        mutate(fg_status = "removed") |>
+        select(-fg_status)
+    ),
+
+    tar_target(
+      name = crb_wide,
+      command = cumulative_removed_biomass |> 
+        mutate(fg_status = "removed") |>
+        select(-fg_status) |>
+        pivot_wider(names_from = removed_fg, values_from = cumulative_removed_biomass, names_prefix = "crb_")
+    )
 
 )
-

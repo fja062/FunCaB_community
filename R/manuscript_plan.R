@@ -18,13 +18,17 @@ manuscript_plan <- list(
   #   format = "file"
   # ),
 
-  #render manuscript
+  # render manuscript
   # tar_render(name = ms,
   #            path = "Manuscript/Manuscript.Rmd")
 
   # Results
-  tar_render(name = results,
-             path = "manuscript/results.qmd")
-
-
+  tar_render(
+    name = manuscript,
+    path = "manuscript/main_manuscript.qmd"
+  ),
+  tar_render(
+    name = si,
+    path = "manuscript/si_model_assumption_checking.qmd"
+  )
 )
