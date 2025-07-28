@@ -68,32 +68,68 @@ result  # This will plot the diagnostics
 
 ## Part 2: single groups
 
-### Functional group richness (Graminoids only)
+### Functional group richness
+
+#### Bryophytes
+```{r}
+#| label: fig-fg-richness-B-diagnostics
+#| echo: false
+#| message: false
+#| fig-height: 12
+
+# Load the fg_richness_focal_analysis target
+tar_load(fg_richness_focal_analysis)
+
+# Check model diagnostics for the 2-way model
+result <- check_model_diagnostics(fg_richness_focal_analysis$bryophytes$model_2way)
+result  # This will plot the diagnostics
+```
+
+#### Forbs
+
+```{r}
+#| label: fig-fg-richness-F-diagnostics
+#| echo: false
+#| message: false
+#| fig-height: 12
+
+# Load the fg_richness_focal_analysis target
+tar_load(fg_richness_focal_analysis)
+
+# Check model diagnostics for the 2-way model
+result <- check_model_diagnostics(fg_richness_focal_analysis$forbs$model_2way)
+result  # This will plot the diagnostics
+```
+
+#### Graminoids
+
 ```{r}
 #| label: fig-fg-richness-G-diagnostics
 #| echo: false
 #| message: false
 #| fig-height: 12
 
-# Load the fg_richness_G_analysis target
-tar_load(fg_richness_G_analysis)
+# Load the fg_richness_focal_analysis target
+tar_load(fg_richness_focal_analysis)
 
 # Check model diagnostics for the 2-way model
-result <- check_model_diagnostics(fg_richness_G_analysis$model_2way)
+result <- check_model_diagnostics(fg_richness_focal_analysis$graminoids$model_2way)
 result  # This will plot the diagnostics
 ```
 
-### Functional group identity (Graminoids only)
+### Functional group identity
+
+#### bryophytes
 ```{r}
-#| label: fig-fg-identity-G-diagnostics
+#| label: fig-fg-identity-B-diagnostics
 #| echo: false
 #| message: false
 #| fig-height: 12
 
-# Load the fg_identity_G_analysis target
-tar_load(fg_identity_G_analysis)
+# Load the fg_identity_focal_analysis target
+tar_load(fg_identity_focal_analysis)
 
 # Check model diagnostics for the 2-way model
-result <- check_model_diagnostics(fg_identity_G_analysis$model_2way)
+result <- check_model_diagnostics(fg_identity_focal_analysis$bryophytes$model_2way)
 result  # This will plot the diagnostics
 ``` 
