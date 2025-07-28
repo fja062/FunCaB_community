@@ -130,23 +130,29 @@ analysis_plan <- list(
     }
   ),
 
-  # functional group identity
+  # functional group identity by focal group (graminoids, forbs, bryophytes)
   tar_target(
-    name = fg_identity_G_analysis,
+    name = fg_identity_focal_analysis,
     command = {
-      # compare full vs 2-way model
-      results <- compare_full_vs_2way_lmer(
-        data = standing_biomass_22 |>
-          filter(str_detect(fg_remaining, "G")),
-        response = "biomass",
-        predictor = "fg_removed"
-      )
+      split_data <- split(standing_biomass_by_focal_fg, standing_biomass_by_focal_fg$focal_fg)
+      purrr::imap(split_data, function(dat, fg) {
+        compare_full_vs_2way_lmer(
+          data = dat,
+          response = "standing_biomass",
+          predictor = "fg_removed"
+        )
+      })
     }
   ),
 
   tar_target(
-    name = fg_identity_G_tidy,
-    command = clean_model_terms(tidy_model(fg_identity_G_analysis$model_2way))
+    name = fg_identity_focal_tidy,
+    command = {
+      purrr::imap_dfr(fg_identity_focal_analysis, function(res, fg) {
+        clean_model_terms(tidy_model(res$model_2way)) %>%
+          dplyr::mutate(focal_fg = fg)
+      })
+    }
   )
 
   # tar_target(
