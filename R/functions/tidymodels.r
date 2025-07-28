@@ -336,16 +336,18 @@ pretty_model_table <- function(df, group_var = NULL) {
 #' Plot tidy model effects with faceting and CI significance
 #' @param data A tidy model output data frame (with columns: term, estimate, std.error, ...)
 #' @param facet_var The column name (string) to facet by (e.g., 'focal_fg')
+#' @param term_order Optional character vector specifying the order of model terms. If NULL, use the order in the data.
 #' @return A ggplot object with effect sizes, faceted by the given variable, and point style by CI crossing zero
-plot_tidy_effects_facet <- function(data, facet_var) {
-  # Reverse order so single effects are on top
-  desired_order <- rev(c("fg_richness", "T", "P", "fg_richness:T", "fg_richness:P", "P:T"))
+plot_tidy_effects_facet <- function(data, facet_var, term_order = NULL) {
+  if (!is.null(term_order)) {
+    data <- data %>%
+      dplyr::mutate(term = factor(term, levels = term_order))
+  }
   data <- data %>%
     dplyr::mutate(
       ci_lower = estimate - std.error,
       ci_upper = estimate + std.error,
-      sig_point = ifelse(p.value < 0.05, "solid", "open"),
-      term = factor(term, levels = desired_order)
+      sig_point = ifelse(p.value < 0.05, "solid", "open")
     )
   ggplot(data %>% dplyr::filter(term != "(Intercept)"),
          aes(x = term, y = estimate, ymin = ci_lower, ymax = ci_upper)) +
