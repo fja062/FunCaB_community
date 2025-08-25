@@ -85,19 +85,19 @@ transformation_plan <- list(
     command = biomass_22 |>
       filter(fg_status == "remaining" | fg_removed == "FGB") |>
       mutate(biomass = if_else(fg_removed == "FGB", 0, biomass)) |>
-      mutate(fg_removed = factor(fg_removed, 
+      mutate(fg_removed = factor(fg_removed,
              levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")))
   ),
 
   # sum biomass between 2015 and 2022 (without XC)
   tar_target(
     name = cumulative_removed_biomass,
-    command = biomass |> 
+    command = biomass |>
       # remove mistakenly cut forb biomass from Ovs1B in 2019
       # MADE A FUNCTION THAT REMOVES THIS. SHOULD REMOVED_FG == B ALSO BE REMOVED?
       # filter(!(plotID == "Ovs1B" & removed_fg == "F")) |>
       # add 2022 data (only removed biomass)
-      bind_rows(biomass_22 |> 
+      bind_rows(biomass_22 |>
         filter(fg_status == "removed" | fg_removed == "none") |>
         mutate(biomass = if_else(fg_removed == "FGB", 0, biomass))) |>
       # sum biomass across years
@@ -136,39 +136,6 @@ transformation_plan <- list(
       filter(!c(year == 2019 & plotID == "Alr3C" & total_bryophytes == 2))
   ),
 
-  # #merge biomass with community
-  # tar_target(
-  #   name = remaining_biomass_merged,
-  #   command = merge_community_biomass(community, standing_biomass)
-  # ),
-
-  # # combine fg_cover with removed_biomass
-  # tar_target(
-  #   name = fg_cover_biomass,
-  #   command = fg_cover |>
-  #     # join with removed biomass by common identifiers
-  #     tidylog::left_join(removed_biomass,
-  #       by = join_by(siteID, blockID, plotID, fg_removed)) |>
-  #     # remove controls with missing biomass data
-  #     filter(!is.na(removed_biomass))
-  # ),
-
-  # # make biomass coefficients
-  # tar_target(
-  #   name = biomass_coefficients,
-  #   command = {
-  #     # get biomass coefficients
-  #     base <- make_biomass_coefficients(remaining_biomass_merged)
-  #     # get biomass in 2015
-  #     biomass_2015 <- base |>
-  #       filter(year == 2015) |>
-  #       select(plotID, biomass_2015 = standing_biomass_calculated)
-  #     # join 2015 biomass back to base
-  #     base |>
-  #       tidylog::left_join(biomass_2015, by = "plotID") |>
-  #       mutate(delta_biomass = standing_biomass_calculated - biomass_2015)
-  #   }
-  # ),
 
   # calculate diversity metrics
   tar_target(
@@ -225,7 +192,7 @@ transformation_plan <- list(
   # standing biomass
     tar_target(
       name = sb_long,
-      command = standing_biomass_22 |> 
+      command = standing_biomass_22 |>
         mutate(fg_status = "remaining") |>
         select(-year, -removed_fg, -fg_status, -comments, -temperature, -precipitation) |>
         rename(standing_biomass = biomass)
@@ -243,14 +210,14 @@ transformation_plan <- list(
     # cumulative removed biomass
     tar_target(
       name = crb_long,
-      command = cumulative_removed_biomass |> 
+      command = cumulative_removed_biomass |>
         mutate(fg_status = "removed") |>
         select(-fg_status)
     ),
 
     tar_target(
       name = crb_wide,
-      command = cumulative_removed_biomass |> 
+      command = cumulative_removed_biomass |>
         mutate(fg_status = "removed") |>
         select(-fg_status) |>
         pivot_wider(names_from = removed_fg, values_from = cumulative_removed_biomass, names_prefix = "crb_")
