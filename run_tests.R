@@ -17,16 +17,17 @@ args <- commandArgs(trailingOnly = TRUE)
 # Test configuration
 test_config <- list(
   unit_tests = c(
-    "tests/test_fit_scaled_mixed_model.R",
-    "tests/test_prepare_model_data.R"
+    "tests/test_compare_full_vs_2way_lmer.R",
+    "tests/test_removed_biomass_raw.R",
+    "tests/test_removed_biomass_final_raw.R"
   ),
   integration_tests = c(
-    "tests/test_pipeline_integration.R"
+    # No integration tests currently available
   ),
   all_tests = c(
-    "tests/test_fit_scaled_mixed_model.R",
-    "tests/test_prepare_model_data.R", 
-    "tests/test_pipeline_integration.R"
+    "tests/test_compare_full_vs_2way_lmer.R",
+    "tests/test_removed_biomass_raw.R",
+    "tests/test_removed_biomass_final_raw.R"
   )
 )
 
@@ -92,8 +93,9 @@ run_function_tests <- function(function_name) {
   
   # Map function names to test files
   function_tests <- list(
-    "fit_scaled_mixed_model" = "tests/test_fit_scaled_mixed_model.R",
-    "prepare_model_data" = "tests/test_prepare_model_data.R"
+    "compare_full_vs_2way_lmer" = "tests/test_compare_full_vs_2way_lmer.R",
+    "removed_biomass_raw" = "tests/test_removed_biomass_raw.R",
+    "removed_biomass_final_raw" = "tests/test_removed_biomass_final_raw.R"
   )
   
   if (function_name %in% names(function_tests)) {
