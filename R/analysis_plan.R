@@ -44,42 +44,6 @@ analysis_plan <- list(
     command = clean_model_terms(tidy_model(fg_identity_analysis$model_2way))
   ),
 
-  # functional group biomass
-  tar_target(
-    name = fg_biomass_analysis,
-    command = {
-      # merge cumulative removed biomass with standing biomass
-      dat <- sb_long |>
-        tidylog::left_join(crb_long,
-          by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")
-        ) |>
-        mutate(fg_removed = factor(fg_removed,
-          levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")
-        )) |>
-        mutate(standing_biomass_log = log(standing_biomass + 1))
-
-      ### SHITY MODEL, ASSUMPTIONS NOT MET!!!
-      # full model
-      fit <- lmerTest::lmer(standing_biomass_log ~ cumulative_removed_biomass * fg_removed * temperature_scaled * precipitation_scaled + (1 | siteID), data = dat)
-      # simpler model
-      fit2 <- lmerTest::lmer(standing_biomass_log ~ cumulative_removed_biomass + fg_removed + temperature_scaled + precipitation_scaled + cumulative_removed_biomass:fg_removed + cumulative_removed_biomass * temperature_scaled * precipitation_scaled + fg_removed * temperature_scaled * precipitation_scaled + (1 | siteID), data = dat)
-      # anova(fit, fit2)
-
-
-      # make function for more than 3 way interactions?
-      # # compare full vs 2-way model
-      # results <- compare_full_vs_2way_lmer(
-      #   data = dat,
-      #   response = "standing_biomass",
-      #   predictor = "biomass"
-      # )
-    }
-  ),
-  tar_target(
-    name = fg_biomass_tidy,
-    command = clean_model_terms(tidy_model(fg_biomass_analysis))
-  ),
-
   # make pca
   tar_target(
     name = community_pca,
