@@ -99,7 +99,7 @@ transformation_plan <- list(
       # add 2022 data (only removed biomass)
       bind_rows(biomass_22 |>
         filter(fg_status == "removed" | fg_removed == "none") |>
-        mutate(biomass = if_else(fg_removed == "FGB", 0, biomass))) |>
+        mutate(biomass = if_else(fg_removed == "none", 0, biomass))) |>
       # sum biomass across years
       group_by(siteID, blockID, plotID, fg_removed, removed_fg, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
       summarise(cumulative_removed_biomass = sum(biomass)) |>
