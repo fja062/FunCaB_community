@@ -34,6 +34,10 @@ In 2022, the whole experiment was harvested and the above ground biomass from al
 
 Plant community composition recorded annually between 2015 and 2019 across all experimental plots. We recorded the presence and visually estimated the cover of each species per plot.
 
+### Data preparation
+
+**Biomass standardisation:** For both biomass harvests in 2015 and in 2022, biomass was standardised to the site level for each functional group removed in each treatment plot. To standardise the biomass removed in 2015, we subtracted the biomass of each functional group in each treatment plot from the mean functional group biomass in the full removal treatment plots at each site. We conducted a similar standardisation for the remaining biomass of the focal functional groups in 2022, instead using the mean site-level biomass of the control plots.
+
 ### Analysis
 
 -   Calculate cumulative removed biomass per treatment and functional group
