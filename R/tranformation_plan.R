@@ -89,9 +89,9 @@ transformation_plan <- list(
              levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")))
   ),
 
-  # sum biomass between 2015 and 2022 (without XC)
+  # filter for biomass in 2015 (without XC)
   tar_target(
-    name = cumulative_removed_biomass,
+    name = removed_biomass,
     command = biomass |>
       # remove mistakenly cut forb biomass from Ovs1B in 2019
       # MADE A FUNCTION THAT REMOVES THIS. SHOULD REMOVED_FG == B ALSO BE REMOVED?
@@ -100,9 +100,10 @@ transformation_plan <- list(
       bind_rows(biomass_22 |>
         filter(fg_status == "removed" | fg_removed == "none") |>
         mutate(biomass = if_else(fg_removed == "none", 0, biomass))) |>
-      # sum biomass across years
+      filter(year == 2015) |>
+      # sum biomass across the growing season
       group_by(siteID, blockID, plotID, fg_removed, removed_fg, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
-      summarise(cumulative_removed_biomass = sum(biomass)) |>
+      summarise(removed_biomass = sum(biomass)) |>
       ungroup()
   ),
 
@@ -207,20 +208,29 @@ transformation_plan <- list(
         pivot_wider(names_from = removed_fg, values_from = standing_biomass, names_prefix = "sb_")
     ),
 
-    # cumulative removed biomass
+  # standardised biomass
+  tar_target(
+    name = standardised_biomass,
+    command = removed_biomass |>
+      mutate(fg_status = "removed") |>
+      select(-fg_status) |>
+      pivot_wider(names_from = removed_fg, values_from = removed_biomass, names_prefix = "rem_")
+  ),
+
+    # removed biomass
     tar_target(
-      name = crb_long,
-      command = cumulative_removed_biomass |>
+      name = removed_biomass_long,
+      command = removed_biomass |>
         mutate(fg_status = "removed") |>
         select(-fg_status)
     ),
 
     tar_target(
-      name = crb_wide,
-      command = cumulative_removed_biomass |>
+      name = removed_biomass_wide,
+      command = removed_biomass |>
         mutate(fg_status = "removed") |>
         select(-fg_status) |>
-        pivot_wider(names_from = removed_fg, values_from = cumulative_removed_biomass, names_prefix = "crb_")
+        pivot_wider(names_from = removed_fg, values_from = removed_biomass, names_prefix = "rem_")
     )
 
 )
