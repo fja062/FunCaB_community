@@ -89,6 +89,23 @@ transformation_plan <- list(
              levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB")))
   ),
 
+  # standardised standing biomass
+  tar_target(
+    name = standardised_standing_biomass,
+    command = standing_biomass_22 |>
+      filter(!fg_remaining %in% c("FGB", "none")) |>
+      # join to the site-level mean for controls per functional group in 2022
+      tidylog::left_join(standing_biomass_22 |>
+                           filter(fg_remaining == "FGB") |>
+                           group_by(siteID, removed_fg, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
+                           summarise(mean_standing_biomass = mean(biomass)),
+                         by = join_by(siteID, removed_fg, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled)) |>
+      # create deltas from the site-level means
+      mutate(delta_standing_biomass = biomass-mean_standing_biomass)
+
+  ),
+
+
   # filter for biomass in 2015 (without XC)
   tar_target(
     name = removed_biomass,
@@ -107,6 +124,25 @@ transformation_plan <- list(
       ungroup()
   ),
 
+
+  # standardised removed biomass
+  tar_target(
+    name = standardised_removed_biomass,
+    command = removed_biomass |>
+      filter(fg_removed != "FGB") |>
+      # join to the site-level mean for controls (FGBs) per functional group in 2015
+      tidylog::left_join(removed_biomass |>
+                           filter(fg_removed == "FGB") |>
+                           group_by(siteID, removed_fg, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
+                           summarise(mean_removed_biomass = mean(removed_biomass)),
+                         by = join_by(siteID, removed_fg, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled)) |>
+      # create deltas from the site-level means
+      mutate(delta_removed_biomass = removed_biomass-mean_removed_biomass)
+
+  ),
+
+
+
   # make community data, impute missing cover values, construct FG cover coefficients
   tar_target(
     name = community,
@@ -123,6 +159,8 @@ transformation_plan <- list(
       filter(fg_removed != "XC") |>
       select(year:fg_removed, species, cover, functional_group, temperature_level:fg_remaining)
   ),
+
+
   tar_target(
     name = fg_cover,
     command = community |>
@@ -193,7 +231,7 @@ transformation_plan <- list(
   # standing biomass
     tar_target(
       name = sb_long,
-      command = standing_biomass_22 |>
+      command = standardised_standing_biomass |>
         mutate(fg_status = "remaining") |>
         select(-year, -removed_fg, -fg_status, -comments, -temperature, -precipitation) |>
         rename(standing_biomass = biomass)
@@ -201,36 +239,29 @@ transformation_plan <- list(
 
     tar_target(
       name = sb_wide,
-      command = standing_biomass_22 |>
+      command = standardised_standing_biomass |>
         mutate(fg_status = "remaining") |>
         select(-year, -fg_status, -comments, -temperature, -precipitation) |>
         rename(standing_biomass = biomass) |>
-        pivot_wider(names_from = removed_fg, values_from = standing_biomass, names_prefix = "sb_")
+        pivot_wider(names_from = removed_fg, values_from = delta_standing_biomass, names_prefix = "sb_")
     ),
 
-  # standardised biomass
-  tar_target(
-    name = standardised_biomass,
-    command = removed_biomass |>
-      mutate(fg_status = "removed") |>
-      select(-fg_status) |>
-      pivot_wider(names_from = removed_fg, values_from = removed_biomass, names_prefix = "rem_")
-  ),
 
-    # removed biomass
+    # removed biomass long
     tar_target(
       name = removed_biomass_long,
-      command = removed_biomass |>
+      command = standardised_removed_biomass |>
         mutate(fg_status = "removed") |>
         select(-fg_status)
     ),
 
+    # removed biomass wide
     tar_target(
       name = removed_biomass_wide,
-      command = removed_biomass |>
+      command = standardised_removed_biomass |>
         mutate(fg_status = "removed") |>
         select(-fg_status) |>
-        pivot_wider(names_from = removed_fg, values_from = removed_biomass, names_prefix = "rem_")
+        pivot_wider(names_from = removed_fg, values_from = delta_removed_biomass, names_prefix = "rem_")
     )
 
 )
