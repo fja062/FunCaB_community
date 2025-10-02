@@ -54,9 +54,10 @@ analysis_plan <- list(
     name = fg_biomass_analysis,
     command = {
       joined_dat <- sb_long |>
-      tidylog::left_join(removed_biomass_wide, by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled"))
+      tidylog::left_join(removed_biomass_long, by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled"))
 
       fit_mod <- lmerTest::lmer(delta_standing_biomass ~ delta_removed_biomass*removed_fg + (1|siteID), data = joined_dat)
+      # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, which is not so interesting.
 
 }
 ),
