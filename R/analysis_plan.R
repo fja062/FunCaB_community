@@ -50,14 +50,17 @@ analysis_plan <- list(
     command = make_sp_pca(cover_data)
   ),
 
+
   tar_target(
     name = fg_biomass_analysis,
     command = {
       joined_dat <- sb_long |>
-      tidylog::left_join(removed_biomass_long, by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled"))
+      tidylog::left_join(removed_biomass_long, by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")) |>
+        mutate(combined_fg_trt = paste(fg_removed, removed_fg, sep = "_"))
 
-      fit_mod <- lmerTest::lmer(delta_standing_biomass ~ delta_removed_biomass*removed_fg + (1|siteID), data = joined_dat)
-      # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, which is not so interesting.
+      fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt*combined_fg_trt*temperature_scaled + (1|siteID), data = joined_dat)
+      # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, hich is #not so interesting.
+      summary(fit_mod)
 
 }
 ),
