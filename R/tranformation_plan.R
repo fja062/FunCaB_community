@@ -132,24 +132,24 @@ transformation_plan <- list(
       {biomass_proportions_control <- removed_biomass |>
           filter(fg_removed == "FGB") |>
 
-          # calculate mean biomass per FG in control plots (per site)
-          group_by(siteID, removed_fg, fg_status) |>
+          # calculate mean biomass per FG in control plots (globally)
+          group_by(removed_fg, fg_status) |>
           mutate(mean_removed_biomass_ctrl = mean(removed_biomass)) |>
           ungroup() |>
 
-          # calculate total biomass in each control plot per site
-          group_by(siteID, plotID, fg_status) |>
+          # calculate total biomass in each control plot (globally)
+          group_by(plotID, fg_status) |>
           mutate(total_removed_biomass_ctrl = sum(removed_biomass)) |>
 
-          # calculate site-level mean of total biomass in control plots
-          group_by(siteID, fg_status) |>
+          # calculate global mean of total biomass in control plots
+          ungroup() |>
           mutate(mean_total_removed_biomass_ctrl = mean(total_removed_biomass_ctrl)) |>
 
           # calculate proportion of each functional group in 2015 control plots
           mutate(prop_removed_biomass_ctrl = mean_removed_biomass_ctrl/mean_total_removed_biomass_ctrl) |>
           ungroup() |>
-          # extract site-level biomass proportion and mean biomass of focal FG
-          distinct(siteID, removed_fg, fg_status, prop_removed_biomass_ctrl, mean_removed_biomass_ctrl)
+          # extract global biomass proportion and mean biomass of focal FG
+          distinct(removed_fg, fg_status, prop_removed_biomass_ctrl, mean_removed_biomass_ctrl)
 
       removed_biomass |>
         filter(fg_removed != "FGB") |>
