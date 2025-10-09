@@ -49,3 +49,80 @@ Plant community composition recorded annually between 2015 and 2019 across all e
 -   We ran the same analysis for each functional group separate (e.g. plots were graminoids present, FB, B, none)
 
 -   Something with diversity
+
+### Standardization of removed biomass
+
+
+```{r}
+#| label: fig-standing-biomass-stacked
+#| fig-cap: "Standing biomass by functional group and treatment across the climate grid"
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_standing_biomass_stacked")) tar_load(fig_standing_biomass_stacked)
+
+# Display plot
+fig_standing_biomass_stacked
+```
+
+
+```{r}
+#| label: fig-removed-biomass-stacked
+#| fig-cap: "Removed biomass by functional group and treatment across the climate grid"
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_removed_biomass_stacked")) tar_load(fig_removed_biomass_stacked)
+
+# Display plot
+fig_removed_biomass_stacked
+```
+
+
+```{r}
+#| label: fig-prop-removed-biomass-stacked
+#| fig-cap: "Proportional removed biomass by functional group and treatment across the climate grid"
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_prop_removed_biomass_stacked")) tar_load(fig_prop_removed_biomass_stacked)
+
+# Display plot
+fig_prop_removed_biomass_stacked
+```
+
+
+```{r}
+#| label: fig-control-biomass-by-site
+#| fig-cap: "Total control biomass by site showing variation in baseline biomass across sites"
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_control_biomass_by_site")) tar_load(fig_control_biomass_by_site)
+
+# Display plot
+fig_control_biomass_by_site
+```
+
+
+```{r}
+#| label: fig-removed-biomass-comparison
+#| fig-cap: "Comparison of raw removed biomass and proportional removed biomass showing the effect of site-specific standardization"
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load the figure from targets
+if (!exists("fig_removed_biomass_comparison")) tar_load(fig_removed_biomass_comparison)
+
+# Display plot
+fig_removed_biomass_comparison
+```

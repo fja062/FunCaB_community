@@ -11,7 +11,7 @@ analysis_plan <- list(
       dat <- standing_biomass_22 |>
         # sum biomass by fg_removed and remaining
         group_by(siteID, blockID, plotID, fg_removed, fg_remaining, fg_richness, fg_status, temperature_level, precipitation_level, temperature_scaled, precipitation_scaled) |>
-        summarise(standing_biomass = sum(biomass), .groups = "drop")
+        tidylog::summarise(standing_biomass = sum(biomass), .groups = "drop")
 
       # compare full vs 2-way model
       results <- compare_full_vs_2way_lmer(
@@ -58,9 +58,12 @@ analysis_plan <- list(
       tidylog::left_join(removed_biomass_long, by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")) |>
         mutate(combined_fg_trt = paste(fg_removed, removed_fg, sep = "_"))
 
-      fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt*combined_fg_trt*temperature_scaled + (1|siteID), data = joined_dat)
-      # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, hich is #not so interesting.
+      fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt + removed_fg + (1|siteID), data = joined_dat)
       summary(fit_mod)
+
+      fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt*removed_fg + (1|siteID), data = joined_dat)
+      summary(fit_mod)
+            # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, hich is #not so interesting.
 
 }
 ),
@@ -134,17 +137,6 @@ analysis_plan <- list(
     }
   )
 
-  # tar_target(
-  #   name = fg_biomass_analysis,
-  #   command = {
-  #     # merge cumulative removed biomass with standing biomass
-  #     dat <- sb_long |>
-  #       tidylog::left_join(crb_long,
-  #         by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")) |>
-  #         mutate(fg_removed = factor(fg_removed,
-  #            levels = c("none", "G", "F", "B", "GF", "GB", "FB", "FGB"))) |>
-  #         mutate(standing_biomass_log = log(standing_biomass + 1))
-  # )
 
   # 1. Effect of remaining/removed biomass on biomass of focal PFG
   # Single FG presence:
