@@ -125,9 +125,9 @@ transformation_plan <- list(
   ),
 
 
-  # standardised removed biomass
+  # standardised removed biomass globally
   tar_target(
-    name = standardised_removed_biomass,
+    name = standardised_removed_biomass_global,
     command =
       {biomass_proportions_control <- removed_biomass |>
           filter(fg_removed == "FGB") |>
@@ -154,13 +154,36 @@ transformation_plan <- list(
       removed_biomass |>
         filter(fg_removed != "FGB") |>
         tidylog::left_join(biomass_proportions_control,
-                           by = join_by(siteID, removed_fg, fg_status)) |>
+                           by = join_by(removed_fg, fg_status)) |>
 
         # calculate cross product to get proportion of each FG in treatment plots
         mutate(prop_removed_biomass_trt = (prop_removed_biomass_ctrl * removed_biomass)/mean_removed_biomass_ctrl)
       }
   ),
 
+  # standardised removed biomass by site
+  tar_target(
+    name = standardised_removed_biomass_site,
+    command = {
+      # Get control biomass per site and FG
+      control_biomass_site <- removed_biomass %>%
+        filter(fg_removed == "FGB") %>%
+        group_by(siteID, removed_fg, fg_status) %>%
+        summarise(
+          mean_removed_biomass_ctrl_site = mean(removed_biomass),
+          .groups = "drop"
+        ) %>%
+        group_by(siteID, fg_status) %>%
+        mutate(total_removed_biomass_ctrl_site = sum(mean_removed_biomass_ctrl_site)) %>%
+        ungroup()
+      
+      # Join and calculate proportion
+      removed_biomass %>%
+        filter(fg_removed != "FGB") %>%
+        tidylog::left_join(control_biomass_site, by = c("siteID", "removed_fg", "fg_status")) %>%
+        mutate(prop_removed_biomass_trt = removed_biomass / total_removed_biomass_ctrl_site)
+    }
+  ),
 
 
   # make community data, impute missing cover values, construct FG cover coefficients
@@ -270,7 +293,7 @@ transformation_plan <- list(
     # removed biomass long
     tar_target(
       name = removed_biomass_long,
-      command = standardised_removed_biomass |>
+      command = standardised_removed_biomass_site |>
         mutate(fg_status = "removed") |>
         select(-fg_status)
     ),
@@ -278,7 +301,7 @@ transformation_plan <- list(
     # removed biomass wide
     tar_target(
       name = removed_biomass_wide,
-      command = standardised_removed_biomass |>
+      command = standardised_removed_biomass_site |>
         mutate(fg_status = "removed") |>
         select(-fg_status) |>
         pivot_wider(names_from = removed_fg, values_from = prop_removed_biomass_trt, names_prefix = "rem_")
