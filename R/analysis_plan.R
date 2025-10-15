@@ -61,9 +61,82 @@ analysis_plan <- list(
       fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt + removed_fg + (1|siteID), data = joined_dat)
       summary(fit_mod)
 
-      fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt*removed_fg + (1|siteID), data = joined_dat)
+      fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt*removed_fg*fg_removed + (1|siteID), data = joined_dat)
       summary(fit_mod)
             # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, hich is #not so interesting.
+
+}
+),
+
+tar_target(
+    name = single_fg_biomass_analysis,
+    command = {
+      joined_dat <- sb_long |>
+      tidylog::left_join(removed_biomass_long, by = c("siteID", "blockID", "plotID", "fg_removed", "fg_remaining", "fg_richness", "temperature_level", "precipitation_level", "temperature_scaled", "precipitation_scaled")) |>
+        mutate(combined_fg_trt = paste(fg_removed, removed_fg, sep = "_"))
+
+      # Function to fit models with error handling
+      fit_single_fg_model <- function(data, formula) {
+        # Check if we have enough levels for factors
+        if (n_distinct(data$fg_removed) < 2) {
+          return(NULL)  # Skip if not enough levels
+        }
+        tryCatch({
+          lmerTest::lmer(as.formula(formula), data = data)
+        }, error = function(e) {
+          message(paste("Model failed:", e$message))
+          return(NULL)
+        })
+      }
+
+      # Create model combinations
+      model_combinations <- expand_grid(
+        fg_remaining = c("F", "G", "B"),
+        removed_fg = c("F", "G", "B"),
+        env_var = c("temperature_scaled", "precipitation_scaled")
+      ) %>%
+        # Filter to valid combinations (remaining != removed)
+        filter(fg_remaining != removed_fg) %>%
+        # Create model formulas
+        mutate(
+          model_formula = case_when(
+            env_var == "temperature_scaled" ~ "standing_biomass ~ prop_removed_biomass_trt * fg_removed * temperature_scaled + (1|siteID)",
+            env_var == "precipitation_scaled" ~ "standing_biomass ~ prop_removed_biomass_trt * fg_removed * precipitation_scaled + (1|siteID)"
+          )
+        )
+
+      # Fit models for each combination
+      single_fg_models <- model_combinations %>%
+        rowwise() %>%
+        mutate(
+          # Filter data for this combination
+          model_data = list(
+            joined_dat %>%
+              filter(fg_remaining == .data$fg_remaining, removed_fg == .data$removed_fg)
+          )
+        ) %>%
+        ungroup() %>%
+        mutate(
+          n_obs = map_int(model_data, nrow),
+          # Fit model if we have enough data
+          model = map2(model_data, model_formula, ~ {
+            if (.y >= 10) {  # Minimum sample size check
+              fit_single_fg_model(.x, .y)
+            } else {
+              NULL
+            }
+          })
+        ) %>%
+        # Add model summaries for successful models
+        mutate(
+          model_summary = map(model, ~ if (!is.null(.x)) broom::tidy(.x) else NULL),
+          model_anova = map(model, ~ if (!is.null(.x)) anova(.x) else NULL)
+        ) %>%
+        # Remove failed models
+        filter(!map_lgl(model, is.null))
+
+      # Return the results
+      single_fg_models
 
 }
 ),
