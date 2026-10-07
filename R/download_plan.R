@@ -18,7 +18,7 @@ download_plan <- list(
   tar_target(
     name = removed_biomass_final_download,
     command =  get_file(node = "tx9r2",
-                        file = "FUNDER_clean_biomass_2022.csv",
+                        file = "FUNDER_clean_standing_biomass_2022.csv",
                         path = "data",
                         remote_path = "1_Vegetation/Clean_data"),
   format = "file"
@@ -40,7 +40,7 @@ download_plan <- list(
     command =  get_file(node = "tx9r2",
                         file = "FUNCAB_species_corrections.csv",
                         path = "data",
-                        remote_path = ""),
+                        remote_path = "z_misc"),
     format = "file"
   ),
 
