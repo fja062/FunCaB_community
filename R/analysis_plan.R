@@ -34,7 +34,7 @@ analysis_plan <- list(
       results <- compare_full_vs_2way_lmer(
         data = standing_biomass_22,
         response = "biomass",
-        # should this be fg_removed x fg_richness. Or should it be identidy (fg_removed) x removed_fg?
+        # should this be fg_removed x fg_richness. Or should it be identity (fg_removed) x removed_fg?
         predictor = "fg_removed"
       )
     }
@@ -63,7 +63,7 @@ analysis_plan <- list(
 
       fit_mod <- lmerTest::lmer(standing_biomass ~ 0 + prop_removed_biomass_trt*removed_fg + (1|siteID), data = joined_dat)
       summary(fit_mod)
-            # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, hich is #not so interesting.
+            # maybe we want this to be a zero-intercept model. At the moment this compares to bryophytes, which is #not so interesting.
 
 }
 ),
@@ -71,6 +71,8 @@ analysis_plan <- list(
 
   # PART 2: Single group effects
   # Graminoids present
+
+    # ---------->  SHOULD THIS MOVE TO THE TRANSFORMATION PLAN? <--------------
 
     # Create a long dataset for each focal functional group present in fg_remaining
   tar_target(
