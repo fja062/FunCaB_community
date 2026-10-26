@@ -79,7 +79,7 @@ transformation_plan <- list(
       )
   ),
 
-  # prep standing biomass 2022 (contains reminaing biomass)
+  # prep standing biomass 2022 (contains remianing biomass)
   tar_target(
     name = standing_biomass_22,
     command = biomass_22 |>
@@ -176,7 +176,7 @@ transformation_plan <- list(
         group_by(siteID, fg_status) %>%
         mutate(total_removed_biomass_ctrl_site = sum(mean_removed_biomass_ctrl_site)) %>%
         ungroup()
-      
+
       # Join and calculate proportion
       removed_biomass %>%
         filter(fg_removed != "FGB") %>%
