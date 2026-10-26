@@ -116,18 +116,6 @@ contrast(
 )
 
 
-#  contrast                                                ratio     SE  df null z.ratio p.value
-#  G_treat1 F_treat0 B_treat0 / G_treat0 F_treat0 B_treat0 0.810 0.1030 Inf    1  -1.654  0.1961
-#  G_treat0 F_treat1 B_treat0 / G_treat0 F_treat0 B_treat0 0.848 0.1080 Inf    1  -1.303  0.1961
-#  G_treat1 F_treat1 B_treat0 / G_treat0 F_treat0 B_treat0 0.433 0.0558 Inf    1  -6.497 <0.0001
-#  G_treat0 F_treat0 B_treat1 / G_treat0 F_treat0 B_treat0 0.658 0.0838 Inf    1  -3.282  0.0031
-#  G_treat1 F_treat0 B_treat1 / G_treat0 F_treat0 B_treat0 0.302 0.0385 Inf    1  -9.386 <0.0001
-#  G_treat0 F_treat1 B_treat1 / G_treat0 F_treat0 B_treat0 0.426 0.0540 Inf    1  -6.737 <0.0001
-#  G_treat1 F_treat1 B_treat1 / G_treat0 F_treat0 B_treat0 0.123 0.0270 Inf    1  -9.564 <0.0001
-
-
-
-
 
 # figures
 
