@@ -46,7 +46,7 @@ fg_cleaning <- function(community_raw, gridded_climate, species_corrections_raw)
     mutate(sum_cover = sum(cover)) |>
     # keep only the TTC controls in Alrust
     filter(!(plotID == "Alr3C" & is.na(turfID))) %>%
-    ungroup() %>%
+    dplyr::ungroup() %>%
     # fix plotIDs
     funcabization(., convert_to = "Funder") %>%
     # make data fancy
@@ -69,7 +69,7 @@ fg_cleaning <- function(community_raw, gridded_climate, species_corrections_raw)
     ) |>
     mutate(moss_height = if_else((is.na(moss_height) & fg_removed == "C"), moss_height2, moss_height)) |>
     select(-moss_height2) |>
-    ungroup()
+    dplyr::ungroup()
 
   impute_trts <- impute_ctrls |>
     left_join(impute_ctrls |>
@@ -87,7 +87,7 @@ fg_cleaning <- function(community_raw, gridded_climate, species_corrections_raw)
       imputed_height = if_else(moss_height == site_moss_height, TRUE, FALSE)
     ) |>
     select(-moss_height2, -site_moss_height) |>
-    ungroup()
+    dplyr::ungroup()
 
   impute_trts
 }
