@@ -12,7 +12,7 @@ clean_ovstedalen_2018_duplicates <- function(data) {
         filter(siteID == "Ovstedalen", year == 2018) |>
         group_by(plotID, removed_fg) |>
         slice(1) |>
-        ungroup()
+        dplyr::ungroup()
     )
 
   return(cleaned_data)
@@ -44,5 +44,5 @@ annotate_2022_fg_status <- function(df) {
   df %>%
     rowwise() %>%
     mutate(fg_status = if (all(str_split(removed_fg, "", simplify = TRUE) %in% str_split(fg_removed, "", simplify = TRUE))) "removed" else "remaining") %>%
-    ungroup()
+    dplyr::ungroup()
 }
