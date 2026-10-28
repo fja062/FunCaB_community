@@ -142,11 +142,8 @@ tar_target(
 ),
 
 
-  # PART 2: Single group effects
-  # Graminoids present
-
 tar_target(
-  name = fg_biomass_compensation_analysis,
+  name = fg_biomass_total_compensation_analysis,
   command = {
     m_total <- glmmTMB(
       total_biomass ~
@@ -188,8 +185,155 @@ tar_target(
 ),
 
 
+# PART 2: Single group effects
+
+tar_target(
+  name = fg_biomass_bryophyte_compensation_analysis,
+  command = {mod_B_comp <- glmmTMB(
+    B ~ G_treat * F_treat +
+      temperature_scaled * precipitation_scaled +
+      (G_treat + F_treat):(temperature_scaled + precipitation_scaled) + G_treat:F_treat:temperature_scaled +
+      G_treat:F_treat:precipitation_scaled +
+      (1 | siteID/blockID),
+    family = Gamma(link = "log"),
+    data = standing_biomass_22_wide |>
+      filter(B_treat == 0, B > 0)
+  )
+
+  tidy(mod_B_comp)
+
+  # check model fit
+  sim_B <- simulateResiduals(
+    fittedModel = mod_B_comp,
+    n = 1000
+  )
+
+  plot(sim_B)
 
 
+  # contrasts for mean temperature and precipitation
+  emm_B <- emmeans(
+    mod_B_comp,
+    ~ G_treat * F_treat,
+    at = list(
+      temperature_scaled = 1.05,
+      precipitation_scaled = 2.21
+    ),
+    type = "response"
+  )
+
+  b_contrasts <- contrast(emm_B, method = "trt.vs.ctrl",
+                          ref = 1,
+                          adjust = "holm")
+
+  summary(b_contrasts, infer = c(TRUE, TRUE))
+
+
+  # contrasts allowing temperature to vary and fixing precipitation to the mean
+  emm_B_temp <- emmeans(
+    mod_B_comp,
+    ~ G_treat * F_treat | temperature_scaled,
+    at = list(
+      temperature_scaled = c(
+        1.05 - 0.22,
+        1.05,
+        1.05 + 0.22
+      ),
+      precipitation_scaled = 2.21
+    ),
+    type = "response"
+  )
+
+  b_contrasts_temp <- contrast(
+    emm_B_temp,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  )
+
+  summary(b_contrasts_temp, infer = c(TRUE, TRUE)) |>
+    tibble() |>
+    ggplot(aes(
+      x = temperature_scaled,
+      y = ratio,
+      colour = contrast,
+      group = contrast
+    )
+    ) +
+    geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+    geom_ribbon(
+      aes(
+        ymin = asymp.LCL,
+        ymax = asymp.UCL,
+        fill = contrast
+      ),
+      alpha = 0.15,
+      colour = NA
+    ) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 2) +
+    labs(
+      x = "Temperature",
+      y = "B biomass relative to control",
+      colour = "Contrast",
+      fill = "Contrast"
+    ) +
+    theme_classic()
+
+
+  # contrasts allowing precipitation to vary and fixing temperature to the mean
+  emm_B_temp <- emmeans(
+    mod_B_comp,
+    ~ G_treat * F_treat | precipitation_scaled,
+    at = list(
+      precipitation_scaled = c(
+        0.87,
+        2.22,
+        4.65
+      ),
+      temperature_scaled = 1.05
+    ),
+    type = "response"
+  )
+
+  b_contrasts_precip <- contrast(
+    emm_B_temp,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  )
+
+  summary(b_contrasts_precip, infer = c(TRUE, TRUE)) |>
+    tibble() |>
+    ggplot(aes(
+      x = precipitation_scaled,
+      y = ratio,
+      colour = contrast,
+      group = contrast
+    )
+    ) +
+    geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+    geom_ribbon(
+      aes(
+        ymin = asymp.LCL,
+        ymax = asymp.UCL,
+        fill = contrast
+      ),
+      alpha = 0.15,
+      colour = NA
+    ) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 2) +
+    labs(
+      x = "Temperature",
+      y = "B biomass relative to control",
+      colour = "Contrast",
+      fill = "Contrast"
+    ) +
+    theme_classic()
+  }
+
+),
 
 
 
