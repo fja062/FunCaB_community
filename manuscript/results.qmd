@@ -77,20 +77,51 @@ fig_fg_identity_interactions
 
 ### Functional group biomass
 
-### Part 2: Focal functional group effects
 ```{r}
 #| label: results-total-biomass-model
-#| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups removed on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
 #| echo: false
 #| warning: false
 #| message: false
 
 # load in results
-tar_load(fg_biomass_compensation_analysis)
+tar_load(fg_biomass_total_compensation_analysis)
 
 
-fg_biomass_compensation_analysis
+fg_biomass_total_compensation_analysis
 ```
+
+```{r}
+#| label: results-total-biomass-figure
+#| fig-cap: "Biomass varies with temperature"
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in figure
+tar_load(fig_total_biomass_treatment_temperature)
+
+# Display plot
+fig_total_biomass_treatment_temperature
+```
+
+
+### Part 2: Focal functional group effects
+
+```{r}
+#| label: results-bryophyte-biomass-model
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fg_biomass_bryophyte_compensation_analysis)
+
+
+fg_biomass_bryophyte_compensation_analysis
+```
+
+
+
 
 ### Functional group richness effect
 
