@@ -169,7 +169,7 @@ tar_target(
 
     emm_total
 
-    b_contrasts_total <- contrast(
+    contrasts_total <- contrast(
       emm_total,
       method = "trt.vs.ctrl",
       ref = 1,
@@ -177,7 +177,9 @@ tar_target(
     )
 
 
-    summary(b_contrasts_total, infer = c(TRUE, TRUE))
+    summary(contrasts_total, infer = c(TRUE, TRUE)) |>
+      tibble() |>
+      gt()
 
 
   }
@@ -187,154 +189,558 @@ tar_target(
 
 # PART 2: Single group effects
 
+  # ------------------------------------------------------------
+  # Analysis data: B retained and present
+  # ------------------------------------------------------------
+  tar_target(
+    name = B_comp_dat,
+    command = standing_biomass_22_wide |>
+      filter(B_treat == 0, B > 0)
+  ),
+
+  # ------------------------------------------------------------
+  # Full bryophyte compensation model
+  # ------------------------------------------------------------
+  tar_target(
+    name = mod_B_comp,
+    command = glmmTMB(
+      B ~
+        G_treat * F_treat * temperature_scaled +
+        G_treat * F_treat * precipitation_scaled +
+        temperature_scaled:precipitation_scaled +
+        (1 | siteID/blockID),
+      family = Gamma(link = "log"),
+      data = B_comp_dat
+    )
+  ),
+
+  # ------------------------------------------------------------
+  # Full-model coefficient table
+  # ------------------------------------------------------------
+  tar_target(
+    name = B_comp_model_results,
+    command = broom.mixed::tidy(
+      mod_B_comp,
+      effects = "fixed",
+      conf.int = TRUE
+    ) |>
+      mutate(
+        estimate = round(estimate, 3),
+        std.error = round(std.error, 3),
+        conf.low = round(conf.low, 3),
+        conf.high = round(conf.high, 3),
+        p.value = case_when(
+          p.value < 0.001 ~ "<0.001",
+          TRUE ~ format(round(p.value, 3), nsmall = 3)
+        )
+      )
+  ),
+
+  tar_target(
+    name = B_comp_model_results_table,
+    command = B_comp_model_results |>
+      gt() |>
+      cols_label(
+        term = "Model term",
+        estimate = "Estimate",
+        std.error = "SE",
+        conf.low = "Lower 95% CI",
+        conf.high = "Upper 95% CI",
+        p.value = md("*p*-value")
+      )
+  ),
+
+  # ------------------------------------------------------------
+  # DHARMa diagnostics
+  # ------------------------------------------------------------
+  tar_target(
+    name = B_comp_dharma,
+    command = {
+      set.seed(123)
+      simulateResiduals(
+        fittedModel = mod_B_comp,
+        n = 1000
+      )
+    }
+  ),
+
+  # This target returns the diagnostic plot
+  tar_target(
+    name = B_comp_dharma_plot,
+    command = plot(B_comp_dharma)
+  ),
+
+  # ------------------------------------------------------------
+  # Contrasts at mean temperature and mean precipitation
+  # ------------------------------------------------------------
+  tar_target(
+    name = B_comp_emm_mean_climate,
+    command = emmeans(
+      mod_B_comp,
+      ~ G_treat * F_treat,
+      at = list(
+        temperature_scaled = 1.05,
+        precipitation_scaled = 2.21
+      )
+    )
+  ),
+
+  tar_target(
+    name = B_comp_contrasts_mean_climate,
+    command = contrast(
+      B_comp_emm_mean_climate,
+      method = "trt.vs.ctrl",
+      ref = 1,
+      adjust = "holm"
+    ) |>
+      summary(
+        type = "response",
+        infer = c(TRUE, TRUE)
+      ) |>
+      as.data.frame()
+  ),
+
+  tar_target(
+    name = B_comp_contrasts_mean_climate_table,
+    command = B_comp_contrasts_mean_climate |>
+      mutate(
+        ratio = round(ratio, 2),
+        asymp.LCL = round(asymp.LCL, 2),
+        asymp.UCL = round(asymp.UCL, 2),
+        `95% CI` = paste0(asymp.LCL, "–", asymp.UCL),
+        p.value = case_when(
+          p.value < 0.001 ~ "<0.001",
+          TRUE ~ format(round(p.value, 3), nsmall = 3)
+        )
+      ) |>
+      select(contrast, ratio, `95% CI`, p.value) |>
+      gt() |>
+      cols_label(
+        contrast = "Contrast",
+        ratio = "Biomass ratio",
+        p.value = md("Adjusted *p*-value")
+      )
+  ),
+
+  # ------------------------------------------------------------
+  # Temperature-dependent contrasts
+  # Precipitation held at its mean
+  # ------------------------------------------------------------
+  tar_target(
+    name = B_comp_emm_temperature,
+    command = emmeans(
+      mod_B_comp,
+      ~ G_treat * F_treat | temperature_scaled,
+      at = list(
+        temperature_scaled = c(
+          1.05 - 0.22,
+          1.05,
+          1.05 + 0.22
+        ),
+        precipitation_scaled = 2.21
+      )
+    )
+  ),
+
+  tar_target(
+    name = B_comp_contrasts_temperature,
+    command = contrast(
+      B_comp_emm_temperature,
+      method = "trt.vs.ctrl",
+      ref = 1,
+      adjust = "holm"
+    ) |>
+      summary(
+        type = "response",
+        infer = c(TRUE, TRUE)
+      ) |>
+      as.data.frame()
+  ),
+
+
+
+  # ------------------------------------------------------------
+  # Precipitation-dependent contrasts
+  # Temperature held at its mean
+  # ------------------------------------------------------------
+  tar_target(
+    name = B_comp_emm_precipitation,
+    command = emmeans(
+      mod_B_comp,
+      ~ G_treat * F_treat | precipitation_scaled,
+      at = list(
+        precipitation_scaled = c(0.87, 2.22, 4.65),
+        temperature_scaled = 1.05
+      )
+    )
+  ),
+
+  tar_target(
+    name = B_comp_contrasts_precipitation,
+    command = contrast(
+      B_comp_emm_precipitation,
+      method = "trt.vs.ctrl",
+      ref = 1,
+      adjust = "holm"
+    ) |>
+      summary(
+        type = "response",
+        infer = c(TRUE, TRUE)
+      ) |>
+      as.data.frame()
+  ),
+
+
+
+
+# ============================================================
+# F FUNCTIONAL-GROUP COMPENSATION MODEL
+# F retained; effects of G and B removal
+# ============================================================
+
 tar_target(
-  name = fg_biomass_bryophyte_compensation_analysis,
-  command = {mod_B_comp <- glmmTMB(
-    B ~ G_treat * F_treat +
-      temperature_scaled * precipitation_scaled +
-      (G_treat + F_treat):(temperature_scaled + precipitation_scaled) + G_treat:F_treat:temperature_scaled +
-      G_treat:F_treat:precipitation_scaled +
+  F_comp_dat,
+  standing_biomass_22_wide |>
+    filter(F_treat == 0, F > 0)
+),
+
+tar_target(
+  mod_F_comp,
+  glmmTMB(
+    F ~
+      G_treat * B_treat * temperature_scaled +
+      G_treat * B_treat * precipitation_scaled +
+      temperature_scaled:precipitation_scaled +
       (1 | siteID/blockID),
     family = Gamma(link = "log"),
-    data = standing_biomass_22_wide |>
-      filter(B_treat == 0, B > 0)
+    data = F_comp_dat
   )
+),
 
-  tidy(mod_B_comp)
-
-  # check model fit
-  sim_B <- simulateResiduals(
-    fittedModel = mod_B_comp,
-    n = 1000
+# Fixed-effect coefficient output
+tar_target(
+  F_comp_model_results,
+  broom.mixed::tidy(
+    mod_F_comp,
+    effects = "fixed",
+    conf.int = TRUE
   )
+),
 
-  plot(sim_B)
+tar_target(
+  F_comp_model_results_table,
+  F_comp_model_results |>
+    mutate(
+      estimate = round(estimate, 3),
+      std.error = round(std.error, 3),
+      conf.low = round(conf.low, 3),
+      conf.high = round(conf.high, 3),
+      p.value = case_when(
+        p.value < 0.001 ~ "<0.001",
+        TRUE ~ format(round(p.value, 3), nsmall = 3)
+      )
+    ) |>
+    gt::gt() |>
+    gt::cols_label(
+      term = "Model term",
+      estimate = "Estimate",
+      std.error = "SE",
+      conf.low = "Lower 95% CI",
+      conf.high = "Upper 95% CI",
+      p.value = gt::md("*p*-value")
+    )
+),
 
+# DHARMa diagnostics
+tar_target(
+  F_comp_dharma,
+  {
+    set.seed(123)
+    DHARMa::simulateResiduals(
+      fittedModel = mod_F_comp,
+      n = 1000
+    )
+  }
+),
 
-  # contrasts for mean temperature and precipitation
-  emm_B <- emmeans(
-    mod_B_comp,
-    ~ G_treat * F_treat,
+tar_target(
+  F_comp_dharma_plot,
+  plot(F_comp_dharma)
+),
+
+# Contrasts at mean climate
+tar_target(
+  F_comp_emm_mean_climate,
+  emmeans::emmeans(
+    mod_F_comp,
+    ~ G_treat * B_treat,
     at = list(
       temperature_scaled = 1.05,
       precipitation_scaled = 2.21
-    ),
-    type = "response"
-  )
-
-  b_contrasts <- contrast(emm_B, method = "trt.vs.ctrl",
-                          ref = 1,
-                          adjust = "holm")
-
-  summary(b_contrasts, infer = c(TRUE, TRUE))
-
-
-  # contrasts allowing temperature to vary and fixing precipitation to the mean
-  emm_B_temp <- emmeans(
-    mod_B_comp,
-    ~ G_treat * F_treat | temperature_scaled,
-    at = list(
-      temperature_scaled = c(
-        1.05 - 0.22,
-        1.05,
-        1.05 + 0.22
-      ),
-      precipitation_scaled = 2.21
-    ),
-    type = "response"
-  )
-
-  b_contrasts_temp <- contrast(
-    emm_B_temp,
-    method = "trt.vs.ctrl",
-    ref = 1,
-    adjust = "holm"
-  )
-
-  summary(b_contrasts_temp, infer = c(TRUE, TRUE)) |>
-    tibble() |>
-    ggplot(aes(
-      x = temperature_scaled,
-      y = ratio,
-      colour = contrast,
-      group = contrast
     )
-    ) +
-    geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
-    geom_ribbon(
-      aes(
-        ymin = asymp.LCL,
-        ymax = asymp.UCL,
-        fill = contrast
-      ),
-      alpha = 0.15,
-      colour = NA
-    ) +
-    geom_line(linewidth = 1) +
-    geom_point(size = 2) +
-    labs(
-      x = "Temperature",
-      y = "B biomass relative to control",
-      colour = "Contrast",
-      fill = "Contrast"
-    ) +
-    theme_classic()
-
-
-  # contrasts allowing precipitation to vary and fixing temperature to the mean
-  emm_B_temp <- emmeans(
-    mod_B_comp,
-    ~ G_treat * F_treat | precipitation_scaled,
-    at = list(
-      precipitation_scaled = c(
-        0.87,
-        2.22,
-        4.65
-      ),
-      temperature_scaled = 1.05
-    ),
-    type = "response"
   )
-
-  b_contrasts_precip <- contrast(
-    emm_B_temp,
-    method = "trt.vs.ctrl",
-    ref = 1,
-    adjust = "holm"
-  )
-
-  summary(b_contrasts_precip, infer = c(TRUE, TRUE)) |>
-    tibble() |>
-    ggplot(aes(
-      x = precipitation_scaled,
-      y = ratio,
-      colour = contrast,
-      group = contrast
-    )
-    ) +
-    geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
-    geom_ribbon(
-      aes(
-        ymin = asymp.LCL,
-        ymax = asymp.UCL,
-        fill = contrast
-      ),
-      alpha = 0.15,
-      colour = NA
-    ) +
-    geom_line(linewidth = 1) +
-    geom_point(size = 2) +
-    labs(
-      x = "Temperature",
-      y = "B biomass relative to control",
-      colour = "Contrast",
-      fill = "Contrast"
-    ) +
-    theme_classic()
-  }
-
 ),
 
+tar_target(
+  F_comp_contrasts_mean_climate,
+  emmeans::contrast(
+    F_comp_emm_mean_climate,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  ) |>
+    summary(type = "response", infer = c(TRUE, TRUE)) |>
+    as.data.frame()
+),
+
+tar_target(
+  F_comp_contrasts_mean_climate_table,
+  F_comp_contrasts_mean_climate |>
+    mutate(
+      ratio = round(ratio, 2),
+      asymp.LCL = round(asymp.LCL, 2),
+      asymp.UCL = round(asymp.UCL, 2),
+      `95% CI` = paste0(asymp.LCL, "–", asymp.UCL),
+      p.value = case_when(
+        p.value < 0.001 ~ "<0.001",
+        TRUE ~ format(round(p.value, 3), nsmall = 3)
+      )
+    ) |>
+    select(contrast, ratio, `95% CI`, p.value) |>
+    gt::gt() |>
+    gt::cols_label(
+      contrast = "Contrast",
+      ratio = "Biomass ratio",
+      p.value = gt::md("Adjusted *p*-value")
+    )
+),
+
+# Temperature-dependent contrasts; precipitation fixed at mean
+tar_target(
+  F_comp_emm_temperature,
+  emmeans::emmeans(
+    mod_F_comp,
+    ~ G_treat * B_treat | temperature_scaled,
+    at = list(
+      temperature_scaled = c(1.05 - 0.22, 1.05, 1.05 + 0.22),
+      precipitation_scaled = 2.21
+    )
+  )
+),
+
+tar_target(
+  F_comp_contrasts_temperature,
+  emmeans::contrast(
+    F_comp_emm_temperature,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  ) |>
+    summary(type = "response", infer = c(TRUE, TRUE)) |>
+    as.data.frame()
+),
+
+
+# Precipitation-dependent contrasts; temperature fixed at mean
+tar_target(
+  F_comp_emm_precipitation,
+  emmeans::emmeans(
+    mod_F_comp,
+    ~ G_treat * B_treat | precipitation_scaled,
+    at = list(
+      precipitation_scaled = c(0.87, 2.22, 4.65),
+      temperature_scaled = 1.05
+    )
+  )
+),
+
+tar_target(
+  F_comp_contrasts_precipitation,
+  emmeans::contrast(
+    F_comp_emm_precipitation,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  ) |>
+    summary(type = "response", infer = c(TRUE, TRUE)) |>
+    as.data.frame()
+),
+
+
+
+# ============================================================
+# G FUNCTIONAL-GROUP COMPENSATION MODEL
+# G retained; effects of F and B removal
+# ============================================================
+
+tar_target(
+  G_comp_dat,
+  standing_biomass_22_wide |>
+    filter(G_treat == 0, G > 0)
+),
+
+tar_target(
+  mod_G_comp,
+  glmmTMB(
+    G ~
+      F_treat * B_treat * temperature_scaled +
+      F_treat * B_treat * precipitation_scaled +
+      temperature_scaled:precipitation_scaled +
+      (1 | siteID/blockID),
+    family = Gamma(link = "log"),
+    data = G_comp_dat
+  )
+),
+
+# Fixed-effect coefficient output
+tar_target(
+  G_comp_model_results,
+  broom.mixed::tidy(
+    mod_G_comp,
+    effects = "fixed",
+    conf.int = TRUE
+  )
+),
+
+tar_target(
+  G_comp_model_results_table,
+  G_comp_model_results |>
+    mutate(
+      estimate = round(estimate, 3),
+      std.error = round(std.error, 3),
+      conf.low = round(conf.low, 3),
+      conf.high = round(conf.high, 3),
+      p.value = case_when(
+        p.value < 0.001 ~ "<0.001",
+        TRUE ~ format(round(p.value, 3), nsmall = 3)
+      )
+    ) |>
+    gt::gt() |>
+    gt::cols_label(
+      term = "Model term",
+      estimate = "Estimate",
+      std.error = "SE",
+      conf.low = "Lower 95% CI",
+      conf.high = "Upper 95% CI",
+      p.value = gt::md("*p*-value")
+    )
+),
+
+# DHARMa diagnostics
+tar_target(
+  G_comp_dharma,
+  {
+    set.seed(123)
+    DHARMa::simulateResiduals(
+      fittedModel = mod_G_comp,
+      n = 1000
+    )
+  }
+),
+
+tar_target(
+  G_comp_dharma_plot,
+  plot(G_comp_dharma)
+),
+
+# Contrasts at mean climate
+tar_target(
+  G_comp_emm_mean_climate,
+  emmeans::emmeans(
+    mod_G_comp,
+    ~ F_treat * B_treat,
+    at = list(
+      temperature_scaled = 1.05,
+      precipitation_scaled = 2.21
+    )
+  )
+),
+
+tar_target(
+  G_comp_contrasts_mean_climate,
+  emmeans::contrast(
+    G_comp_emm_mean_climate,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  ) |>
+    summary(type = "response", infer = c(TRUE, TRUE)) |>
+    as.data.frame()
+),
+
+tar_target(
+  G_comp_contrasts_mean_climate_table,
+  G_comp_contrasts_mean_climate |>
+    mutate(
+      ratio = round(ratio, 2),
+      asymp.LCL = round(asymp.LCL, 2),
+      asymp.UCL = round(asymp.UCL, 2),
+      `95% CI` = paste0(asymp.LCL, "–", asymp.UCL),
+      p.value = case_when(
+        p.value < 0.001 ~ "<0.001",
+        TRUE ~ format(round(p.value, 3), nsmall = 3)
+      )
+    ) |>
+    select(contrast, ratio, `95% CI`, p.value) |>
+    gt::gt() |>
+    gt::cols_label(
+      contrast = "Contrast",
+      ratio = "Biomass ratio",
+      p.value = gt::md("Adjusted *p*-value")
+    )
+),
+
+# Temperature-dependent contrasts; precipitation fixed at mean
+tar_target(
+  G_comp_emm_temperature,
+  emmeans::emmeans(
+    mod_G_comp,
+    ~ F_treat * B_treat | temperature_scaled,
+    at = list(
+      temperature_scaled = c(1.05 - 0.22, 1.05, 1.05 + 0.22),
+      precipitation_scaled = 2.21
+    )
+  )
+),
+
+tar_target(
+  G_comp_contrasts_temperature,
+  emmeans::contrast(
+    G_comp_emm_temperature,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  ) |>
+    summary(type = "response", infer = c(TRUE, TRUE)) |>
+    as.data.frame()
+),
+
+
+
+# Precipitation-dependent contrasts; temperature fixed at mean
+tar_target(
+  G_comp_emm_precipitation,
+  emmeans::emmeans(
+    mod_G_comp,
+    ~ F_treat * B_treat | precipitation_scaled,
+    at = list(
+      precipitation_scaled = c(0.87, 2.22, 4.65),
+      temperature_scaled = 1.05
+    )
+  )
+),
+
+tar_target(
+  G_comp_contrasts_precipitation,
+  emmeans::contrast(
+    G_comp_emm_precipitation,
+    method = "trt.vs.ctrl",
+    ref = 1,
+    adjust = "holm"
+  ) |>
+    summary(type = "response", infer = c(TRUE, TRUE)) |>
+    as.data.frame()
+),
 
 
 
