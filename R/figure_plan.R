@@ -1,10 +1,10 @@
 # Figure plan for FunCaB Community Analysis
 figure_plan <- list(
 
-  tar_target(
-    name = fig_pca,
-    command = make_sp_pca_figure(community_pca)
-  ),
+  #tar_target(
+  #  name = fig_pca,
+  #  command = make_sp_pca_figure(community_pca)
+  #),
 
   tar_target(
     name = fig_fg_richness_effects,
@@ -47,15 +47,15 @@ figure_plan <- list(
   # fg richness focals
   tar_target(
     name = fig_fg_richness_focal_effects,
-    command = plot_tidy_effects_facet(data = fg_richness_focal_tidy, 
-                                      facet_var = "focal_fg", 
+    command = plot_tidy_effects_facet(data = fg_richness_focal_tidy,
+                                      facet_var = "focal_fg",
                                       term_order = rev(c("fg_richness", "T", "P", "fg_richness:T", "fg_richness:P", "P:T")))
   ),
 
   # fg identity focals
   tar_target(
     name = fig_fg_identity_focal_effects,
-    command = plot_tidy_effects_facet(data = fg_identity_focal_tidy, 
+    command = plot_tidy_effects_facet(data = fg_identity_focal_tidy,
                                       facet_var = "focal_fg")
   ),
 
@@ -63,27 +63,27 @@ figure_plan <- list(
     name = fig_fg_identity_focal_interactions,
     command = {
       p1 <- plot_model(fg_identity_focal_analysis$bryophytes$model_2way,
-        type = "pred", 
+        type = "pred",
         terms = c("precipitation_scaled", "fg_removed"),
         title = "Bryophytes")
-      p2 <- plot_model(fg_identity_focal_analysis$forbs$model_2way, 
-        type = "pred", 
+      p2 <- plot_model(fg_identity_focal_analysis$forbs$model_2way,
+        type = "pred",
         terms = c("precipitation_scaled", "fg_removed"),
         title = "Forbs")
-      p3 <- plot_model(fg_identity_focal_analysis$graminoids$model_2way, 
-        type = "pred", 
+      p3 <- plot_model(fg_identity_focal_analysis$graminoids$model_2way,
+        type = "pred",
         terms = c("precipitation_scaled", "fg_removed"),
         title = "Graminoids")
-      p4 <- plot_model(fg_identity_focal_analysis$bryophytes$model_2way, 
-        type = "pred", 
+      p4 <- plot_model(fg_identity_focal_analysis$bryophytes$model_2way,
+        type = "pred",
         terms = c("temperature_scaled", "fg_removed"),
         title = "Bryophytes")
-      p5 <- plot_model(fg_identity_focal_analysis$forbs$model_2way, 
-        type = "pred", 
+      p5 <- plot_model(fg_identity_focal_analysis$forbs$model_2way,
+        type = "pred",
         terms = c("temperature_scaled", "fg_removed"),
         title = "Forbs")
-      p6 <- plot_model(fg_identity_focal_analysis$graminoids$model_2way, 
-        type = "pred", 
+      p6 <- plot_model(fg_identity_focal_analysis$graminoids$model_2way,
+        type = "pred",
         terms = c("temperature_scaled", "fg_removed"),
         title = "Graminoids")
 
@@ -191,9 +191,208 @@ figure_plan <- list(
         labs(y = "Total control biomass", x = "Site") +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
     }
+  ),
+
+  tar_target(
+    name = fig_total_biomass_treatment_temperature,
+    command = {
+      ggplot(standing_biomass_22_wide, aes(x = fg_removed, y = total_biomass)) +
+        geom_boxplot(outlier.shape = NA) +
+        geom_jitter(width = 0.12, alpha = 0.6) +
+        labs(
+          x = "Functional groups removed",
+          y = "Total biomass"
+        ) +
+        theme_classic() + facet_grid(~temperature_level)
+    }
+  ),
+
+  tar_target(
+    name = fig_G_comp_precipitation_contrast,
+    command = G_comp_contrasts_precipitation |>
+      ggplot(
+        aes(
+          x = precipitation_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Precipitation",
+        y = "G biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_G_comp_temperature_contrast,
+    command = G_comp_contrasts_temperature |>
+      ggplot(
+        aes(
+          x = temperature_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Temperature",
+        y = "G biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_B_comp_temperature_contrast,
+    command = B_comp_contrasts_temperature |>
+      ggplot(
+        aes(
+          x = temperature_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(
+        yintercept = 1,
+        linetype = 2,
+        colour = "grey40"
+      ) +
+      geom_ribbon(
+        aes(
+          ymin = asymp.LCL,
+          ymax = asymp.UCL
+        ),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Temperature",
+        y = "B biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_B_comp_precipitation_contrast,
+    command = B_comp_contrasts_precipitation |>
+      ggplot(
+        aes(
+          x = precipitation_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(
+        yintercept = 1,
+        linetype = 2,
+        colour = "grey40"
+      ) +
+      geom_ribbon(
+        aes(
+          ymin = asymp.LCL,
+          ymax = asymp.UCL
+        ),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Precipitation",
+        y = "B biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_F_comp_precipitation_contrast,
+    command = F_comp_contrasts_precipitation |>
+      ggplot(
+        aes(
+          x = precipitation_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Precipitation",
+        y = "F biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_F_comp_temperature_contrast,
+    command = F_comp_contrasts_temperature |>
+      ggplot(
+        aes(
+          x = temperature_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Temperature",
+        y = "F biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
   )
-
-
-
 
 )

@@ -305,6 +305,21 @@ transformation_plan <- list(
         mutate(fg_status = "removed") |>
         select(-fg_status) |>
         pivot_wider(names_from = removed_fg, values_from = prop_removed_biomass_trt, names_prefix = "rem_")
-    )
+    ),
+
+  # 2022 biomass reshaped and wide
+  tar_target(
+    name = standing_biomass_22_wide,
+    command = standing_biomass_22 |>
+      pivot_wider(names_from = removed_fg, values_from = biomass, values_fill = 0) |>
+      mutate(
+        B_treat = as.integer(str_detect(fg_removed, stringr::fixed("B"))),
+        G_treat = as.integer(str_detect(fg_removed, stringr::fixed("G"))),
+        F_treat = as.integer(str_detect(fg_removed, stringr::fixed("F")))) |>
+      group_by(plotID) |>
+      mutate(total_biomass = sum(F,G,B)) |>
+      ungroup() |>
+      tidylog::filter(fg_removed != "FGB")
+  )
 
 )

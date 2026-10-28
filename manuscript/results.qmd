@@ -20,7 +20,7 @@ library(gt)
 Test overall effects of number of functional groups (functional group richness) on standing biomass across the climate grid.
 
 ```{r}
-#| label: fig-fg-fichness-effects
+#| label: fig-fg-richness-effects
 #| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
 #| echo: false
 #| warning: false
@@ -77,8 +77,157 @@ fig_fg_identity_interactions
 
 ### Functional group biomass
 
+```{r}
+#| label: results-total-biomass-model
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fg_biomass_total_compensation_analysis)
+
+
+fg_biomass_total_compensation_analysis
+```
+
+```{r}
+#| label: results-total-biomass-figure
+#| fig-cap: "Biomass varies with temperature"
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in figure
+tar_load(fig_total_biomass_treatment_temperature)
+
+# Display plot
+fig_total_biomass_treatment_temperature
+```
+
 
 ### Part 2: Focal functional group effects
+#### Bryophytes
+```{r}
+#| label: results-bryophyte-biomass-model
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(B_comp_model_results_table)
+
+
+B_comp_model_results_table
+```
+
+```{r}
+#| label: results-bryophyte-precipitation-biomass-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_B_comp_precipitation_contrast)
+
+
+fig_B_comp_precipitation_contrast
+```
+
+```{r}
+#| label: results-bryophyte-biomass-temperature-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_B_comp_temperature_contrast)
+
+
+fig_B_comp_temperature_contrast
+```
+
+
+#### Graminoids
+```{r}
+#| label: results-graminoid-biomass-model
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(G_comp_model_results_table)
+
+
+G_comp_model_results_table
+```
+
+```{r}
+#| label: results-graminoid-precipitation-biomass-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_G_comp_precipitation_contrast)
+
+
+fig_G_comp_precipitation_contrast
+```
+
+```{r}
+#| label: results-graminoid-biomass-temperature-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_G_comp_temperature_contrast)
+
+
+fig_G_comp_temperature_contrast
+```
+
+#### Forbs
+```{r}
+#| label: results-forb-biomass-model
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(F_comp_model_results_table)
+
+
+F_comp_model_results_table
+```
+
+```{r}
+#| label: results-forb-precipitation-biomass-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_F_comp_precipitation_contrast)
+
+
+fig_F_comp_precipitation_contrast
+```
+
+```{r}
+#| label: results-forb-biomass-temperature-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_F_comp_temperature_contrast)
+
+
+fig_F_comp_temperature_contrast
+```
+
+
 
 ### Functional group richness effect
 

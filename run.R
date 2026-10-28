@@ -1,6 +1,7 @@
 # script to run pipeline
 library(targets)
 
+#tar_prune()
 targets::tar_make()
 tar_load_everything()
 
