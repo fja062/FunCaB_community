@@ -145,7 +145,69 @@ tar_target(
   # PART 2: Single group effects
   # Graminoids present
 
-    # ---------->  SHOULD THIS MOVE TO THE TRANSFORMATION PLAN? <--------------
+tar_target(
+  name = fg_biomass_compensation_analysis,
+  command = {
+    m_total <- glmmTMB(
+      total_biomass ~
+        (G_treat + F_treat + B_treat)^2 +
+        temperature_scaled * precipitation_scaled +
+        (G_treat + F_treat + B_treat):(temperature_scaled + precipitation_scaled) +
+        (1 | siteID/blockID),
+      family = Gamma(link = "log"),
+      data = standing_biomass_22_wide
+    )
+
+    tidy(m_total)
+
+    emm_total <- emmeans(
+      m_total,
+      ~ G_treat * F_treat * B_treat,
+      type = "response",
+      at = list(
+        temperature_scaled = 1.05,
+        precipitation_scaled = 2.21
+      )
+    )
+
+    emm_total
+
+    b_contrasts_total <- contrast(
+      emm_total,
+      method = "trt.vs.ctrl",
+      ref = 1,
+      adjust = "holm"
+    )
+
+
+    summary(b_contrasts_total, infer = c(TRUE, TRUE))
+
+
+  }
+
+),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # Create a long dataset for each focal functional group present in fg_remaining
   tar_target(
