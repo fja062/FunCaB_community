@@ -20,7 +20,7 @@ library(gt)
 Test overall effects of number of functional groups (functional group richness) on standing biomass across the climate grid.
 
 ```{r}
-#| label: fig-fg-fichness-effects
+#| label: fig-fg-richness-effects
 #| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
 #| echo: false
 #| warning: false
@@ -77,8 +77,20 @@ fig_fg_identity_interactions
 
 ### Functional group biomass
 
-
 ### Part 2: Focal functional group effects
+```{r}
+#| label: results-total-biomass-model
+#| fig-cap: "Estimated effects from the mixed-effects model of number of functional groups removed on standing biomass. The model coefficients with confidence intervals for functional group richness, precipitation, and temperature and their interactions are shown."
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fg_biomass_compensation_analysis)
+
+
+fg_biomass_compensation_analysis
+```
 
 ### Functional group richness effect
 
