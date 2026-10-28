@@ -205,10 +205,194 @@ figure_plan <- list(
         ) +
         theme_classic() + facet_grid(~temperature_level)
     }
+  ),
+
+  tar_target(
+    name = fig_G_comp_precipitation_contrast,
+    command = G_comp_contrasts_precipitation |>
+      ggplot(
+        aes(
+          x = precipitation_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Precipitation",
+        y = "G biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_G_comp_temperature_contrast,
+    command = G_comp_contrasts_temperature |>
+      ggplot(
+        aes(
+          x = temperature_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Temperature",
+        y = "G biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_B_comp_temperature_contrast,
+    command = B_comp_contrasts_temperature |>
+      ggplot(
+        aes(
+          x = temperature_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(
+        yintercept = 1,
+        linetype = 2,
+        colour = "grey40"
+      ) +
+      geom_ribbon(
+        aes(
+          ymin = asymp.LCL,
+          ymax = asymp.UCL
+        ),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Temperature",
+        y = "B biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_B_comp_precipitation_contrast,
+    command = B_comp_contrasts_precipitation |>
+      ggplot(
+        aes(
+          x = precipitation_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(
+        yintercept = 1,
+        linetype = 2,
+        colour = "grey40"
+      ) +
+      geom_ribbon(
+        aes(
+          ymin = asymp.LCL,
+          ymax = asymp.UCL
+        ),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Precipitation",
+        y = "B biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_F_comp_precipitation_contrast,
+    command = F_comp_contrasts_precipitation |>
+      ggplot(
+        aes(
+          x = precipitation_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Precipitation",
+        y = "F biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
+  ),
+
+  tar_target(
+    name = fig_F_comp_temperature_contrast,
+    command = F_comp_contrasts_temperature |>
+      ggplot(
+        aes(
+          x = temperature_scaled,
+          y = ratio,
+          colour = contrast,
+          fill = contrast,
+          group = contrast
+        )
+      ) +
+      geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
+      geom_ribbon(
+        aes(ymin = asymp.LCL, ymax = asymp.UCL),
+        alpha = 0.15,
+        colour = NA
+      ) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
+      labs(
+        x = "Temperature",
+        y = "F biomass relative to control",
+        colour = "Contrast",
+        fill = "Contrast"
+      ) +
+      theme_classic()
   )
-
-
-
-
 
 )
