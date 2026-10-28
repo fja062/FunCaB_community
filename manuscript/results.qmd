@@ -106,7 +106,7 @@ fig_total_biomass_treatment_temperature
 
 
 ### Part 2: Focal functional group effects
-
+#### Bryophytes
 ```{r}
 #| label: results-bryophyte-biomass-model
 #| echo: false
@@ -114,12 +114,118 @@ fig_total_biomass_treatment_temperature
 #| message: false
 
 # load in results
-tar_load(fg_biomass_bryophyte_compensation_analysis)
+tar_load(B_comp_model_results_table)
 
 
-fg_biomass_bryophyte_compensation_analysis
+B_comp_model_results_table
 ```
 
+```{r}
+#| label: results-bryophyte-precipitation-biomass-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_B_comp_precipitation_contrast)
+
+
+fig_B_comp_precipitation_contrast
+```
+
+```{r}
+#| label: results-bryophyte-biomass-temperature-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_B_comp_temperature_contrast)
+
+
+fig_B_comp_temperature_contrast
+```
+
+
+#### Graminoids
+```{r}
+#| label: results-graminoid-biomass-model
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(G_comp_model_results_table)
+
+
+G_comp_model_results_table
+```
+
+```{r}
+#| label: results-graminoid-precipitation-biomass-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_G_comp_precipitation_contrast)
+
+
+fig_G_comp_precipitation_contrast
+```
+
+```{r}
+#| label: results-graminoid-biomass-temperature-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_G_comp_temperature_contrast)
+
+
+fig_G_comp_temperature_contrast
+```
+
+#### Forbs
+```{r}
+#| label: results-forb-biomass-model
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(F_comp_model_results_table)
+
+
+F_comp_model_results_table
+```
+
+```{r}
+#| label: results-forb-precipitation-biomass-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_F_comp_precipitation_contrast)
+
+
+fig_F_comp_precipitation_contrast
+```
+
+```{r}
+#| label: results-forb-biomass-temperature-figure
+#| echo: false
+#| warning: false
+#| message: false
+
+# load in results
+tar_load(fig_F_comp_temperature_contrast)
+
+
+fig_F_comp_temperature_contrast
+```
 
 
 
