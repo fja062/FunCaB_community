@@ -7,9 +7,9 @@ set.seed(123)
 test <- standing_biomass_22 |>
   pivot_wider(names_from = removed_fg, values_from = biomass, values_fill = 0) |>
   mutate(
-   B_treat = as.integer(str_detect(fg_removed, stringr::fixed("B"))),
-   G_treat = as.integer(str_detect(fg_removed, stringr::fixed("G"))),
-   F_treat = as.integer(str_detect(fg_removed, stringr::fixed("F")))) |>
+    B_treat = as.integer(str_detect(fg_removed, stringr::fixed("B"))),
+    G_treat = as.integer(str_detect(fg_removed, stringr::fixed("G"))),
+    F_treat = as.integer(str_detect(fg_removed, stringr::fixed("F")))) |>
   group_by(plotID) |>
   mutate(total_biomass = sum(F,G,B)) |>
   ungroup() |>
@@ -90,7 +90,7 @@ mod_B_comp <- glmmTMB(
   B ~ G_treat * F_treat +
     temperature_scaled * precipitation_scaled +
     (G_treat + F_treat):(temperature_scaled + precipitation_scaled) + G_treat:F_treat:temperature_scaled +
-  G_treat:F_treat:precipitation_scaled +
+    G_treat:F_treat:precipitation_scaled +
     (1 | siteID/blockID),
   family = Gamma(link = "log"),
   data = harvest_dat_std |>
@@ -122,8 +122,8 @@ emm_B <- emmeans(
 )
 
 b_contrasts <- contrast(emm_B, method = "trt.vs.ctrl",
-         ref = 1,
-         adjust = "holm")
+                        ref = 1,
+                        adjust = "holm")
 
 summary(b_contrasts, infer = c(TRUE, TRUE))
 
@@ -205,11 +205,11 @@ b_contrasts_precip <- contrast(
 summary(b_contrasts_precip, infer = c(TRUE, TRUE)) |>
   tibble() |>
   ggplot(aes(
-      x = precipitation_scaled,
-      y = ratio,
-      colour = contrast,
-      group = contrast
-    )
+    x = precipitation_scaled,
+    y = ratio,
+    colour = contrast,
+    group = contrast
+  )
   ) +
   geom_hline(yintercept = 1, linetype = 2, colour = "grey40") +
   geom_ribbon(
